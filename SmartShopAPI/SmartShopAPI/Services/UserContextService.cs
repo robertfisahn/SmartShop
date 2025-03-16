@@ -4,14 +4,9 @@ using System.Security.Claims;
 
 namespace SmartShopAPI.Services
 {
-    public class UserContextService : IUserContextService
+    public class UserContextService(IHttpContextAccessor contextAccessor) : IUserContextService
     {
-        private readonly IHttpContextAccessor _contextAccessor;
-        
-        public UserContextService(IHttpContextAccessor contextAccessor)
-        {
-            _contextAccessor = contextAccessor;
-        }
+        private readonly IHttpContextAccessor _contextAccessor = contextAccessor;
 
         public ClaimsPrincipal User => _contextAccessor.HttpContext?.User;
 

@@ -97,7 +97,7 @@ builder.Services.AddAutoMapper(typeof(SmartShopMappingProfile));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSmartShopUI",
-        builder => builder.WithOrigins("http://localhost:4200", "http://localhost:4288")
+        builder => builder.WithOrigins("http://localhost:4200", "http://localhost:4288", "http://127.0.0.1:4200")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
 });

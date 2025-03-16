@@ -22,7 +22,7 @@ export class CartComponent implements OnInit {
   ngOnInit(): void {
     this.userId = +sessionStorage.getItem('userId')!;
 
-    this.cartService.getCart(this.userId).subscribe(
+    this.cartService.getCart().subscribe(
       (items: CartItem[]) => {
         this.cartItems = items;
         this.calculateTotal();
@@ -38,7 +38,7 @@ export class CartComponent implements OnInit {
   }
 
   loadCart(): void {
-    this.cartService.getCart(this.userId).subscribe(
+    this.cartService.getCart().subscribe(
       data => {
         this.cartItems = data;
         this.calculateTotal();
@@ -76,7 +76,7 @@ export class CartComponent implements OnInit {
   }
 
   clearCart(): void {
-    this.cartService.clearCart(this.userId).subscribe(
+    this.cartService.clearCart().subscribe(
       () => this.loadCart(),
       error => console.error('Error clearing the cart', error)
     );

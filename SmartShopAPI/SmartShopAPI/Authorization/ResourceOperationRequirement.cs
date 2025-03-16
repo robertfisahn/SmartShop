@@ -4,17 +4,12 @@ namespace SmartShopAPI.Authorization
 {
     public enum ResourceOperation
     {
-        Create,
-        Read,
         Update,
         Delete
     }
-    public class ResourceOperationRequirement : IAuthorizationRequirement
+
+    public class ResourceOperationRequirement(ResourceOperation resourceOperation) : IAuthorizationRequirement
     {
-        public ResourceOperationRequirement(ResourceOperation resourceOperation)
-        {
-            ResourceOperation = resourceOperation;
-        }
-        public ResourceOperation ResourceOperation { get; }
+        public ResourceOperation ResourceOperation { get; } = resourceOperation;
     }
 }

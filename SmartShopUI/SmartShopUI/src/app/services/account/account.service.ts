@@ -21,8 +21,6 @@ export class AccountService {
       tap(response => {
         if (response && response.token) {
           sessionStorage.setItem('token', response.token);
-          sessionStorage.setItem('userId', response.userId);
-          sessionStorage.setItem('userEmail', response.userEmail);
 
           this.cartService.updateCartCount(); 
         }
@@ -36,16 +34,10 @@ export class AccountService {
 
   logout(): void {
     sessionStorage.removeItem('token');
-    sessionStorage.removeItem('userId');
-    sessionStorage.removeItem('userEmail');
   }
 
   isLoggedIn(): boolean {
     return !!sessionStorage.getItem('token');
-  }
-
-  getUserEmail(): string | null {
-    return sessionStorage.getItem('userEmail');
   }
 
   isAdmin() {
@@ -56,5 +48,14 @@ export class AccountService {
       return userRole === 'Admin';
     }
     return false;
+  }
+
+  getUserEmail(): string | null {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      return decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || null;
+    }
+    return null;
   }
 }

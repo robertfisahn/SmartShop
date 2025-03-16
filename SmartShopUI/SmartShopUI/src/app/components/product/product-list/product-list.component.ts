@@ -66,7 +66,7 @@ export class ProductListComponent implements OnInit {
   updateCartCount(): void {
     const userId = Number(sessionStorage.getItem('userId'));
     if (userId) {
-      this.cartService.getTotalQuantity(userId).subscribe(
+      this.cartService.getTotalQuantity().subscribe(
         count => {
           this.cartItemCount = count;
         },

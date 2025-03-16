@@ -5,6 +5,8 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AccountService } from './services/account/account.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 import { AppComponent } from './app.component';
 import { ProductListComponent } from './components/product/product-list/product-list.component';
@@ -37,10 +39,16 @@ import { ProductDeleteComponent } from './components/product/product-delete/prod
         ProductUpdateComponent,
         ProductDeleteComponent
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+  bootstrap: [AppComponent],
+  imports: [BrowserModule,
         AppRoutingModule,
         FormsModule,
-        ReactiveFormsModule], providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }, provideHttpClient(withInterceptorsFromDi())]
+    ReactiveFormsModule],
+  providers: [
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    provideHttpClient(withInterceptorsFromDi()),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ]
 })
 export class AppModule {
   constructor(public accountService: AccountService) { }

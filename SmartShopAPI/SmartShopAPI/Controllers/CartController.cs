@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartShopAPI.Authorization;
 using SmartShopAPI.Entities;
+using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Models.Dtos.CartItem;
 
@@ -9,20 +11,16 @@ namespace SmartShopAPI.Controllers
     [Route("api/cart")]
     [ApiController]
     [Authorize]
-    public class CartController : ControllerBase
+    public class CartController(ICartService cartService, IAuthorizationService authorizationService, IUserContextService userContextService) : ControllerBase
     {
-        private readonly ICartService _cartService;
-        public CartController(ICartService cartService) {
-            _cartService = cartService;
-        }
 
-        [HttpGet("{userId}")]
+        [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<CartItem>> GetAll([FromRoute]int userId) {
-           var cartItems = _cartService.GetById(userId);
+        public ActionResult<IEnumerable<CartItem>> GetCart() {
+            var cartItems = cartService.GetUserCart(userContextService.GetUserId());
             return Ok(cartItems);
         }
 
@@ -32,9 +30,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult AddToCart([FromBody]CreateCartItemDto dto)
+        public ActionResult AddItem([FromBody]CreateCartItemDto dto)
         {
-            var cartItemId = _cartService.AddItemToCart(dto);
+            var cartItemId = cartService.AddCartItem(dto, userContextService.GetUserId());
             return Created($"api/cart/{cartItemId}", null);
         }
 
@@ -43,8 +41,16 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult DeleteCartItem([FromRoute]int cartItemId) {
-            _cartService.DeleteItemFromCart(cartItemId);
+        public ActionResult DeleteItem([FromRoute]int cartItemId) {
+
+            var cartItem = cartService.GetCartItem(cartItemId);
+            var authorizationResult = authorizationService.AuthorizeAsync(userContextService.User, cartItem,
+                new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("Authorization failed");
+            }
+                cartService.DeleteCartItem(cartItemId);
             return NoContent();
         }
 
@@ -54,20 +60,27 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult UpdateCartItem([FromRoute]int cartItemId, [FromBody]UpdateCartItemDto dto)
+        public ActionResult UpdateItem([FromRoute]int cartItemId, [FromBody]UpdateCartItemDto dto)
         {
-            _cartService.UpdateCartItem(cartItemId, dto);
+            var cartItem = cartService.GetCartItem(cartItemId);
+            var authorizationResult = authorizationService.AuthorizeAsync(userContextService.User, cartItem,
+                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException("Authorization failed");
+            }
+            cartService.UpdateCartItem(cartItemId, dto);
             return Ok();
         }
 
-        [HttpDelete("clear/{userId}")]
+        [HttpDelete("clear")]
         [ProducesResponseType(204)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult ClearCart([FromRoute]int userId)
+        public ActionResult ClearCart()
         {
-            _cartService.ClearCartItems(userId);
+            cartService.ClearCartItems(userContextService.GetUserId());
             return NoContent();
         }
     }

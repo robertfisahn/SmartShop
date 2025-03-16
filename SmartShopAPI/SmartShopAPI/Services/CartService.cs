@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
@@ -10,39 +8,29 @@ using SmartShopAPI.Models.Dtos.CartItem;
 
 namespace SmartShopAPI.Services
 {
-    public class CartService : ICartService
+    public class CartService(SmartShopDbContext context, IMapper mapper) : ICartService
     {
-        private readonly SmartShopDbContext _context;
-        private readonly IUserContextService _userContextService;
-        private readonly IMapper _mapper;
-        private readonly IAuthorizationService _authorizationService;
 
-        public CartService(SmartShopDbContext context, IUserContextService userContextService, IMapper mapper, IAuthorizationService authorizationService)
+        public IEnumerable<CartItem> GetUserCart(int userId)
         {
-            _context = context;
-            _userContextService = userContextService;
-            _mapper = mapper;
-            _authorizationService = authorizationService;
-        }
-
-        public IEnumerable<CartItem> GetById(int userId)
-        {
-            var currentUserId = _userContextService.GetUserId();
-            if(userId != currentUserId)
-            {
-                throw new ForbidException("Authorization failed");  
-            }
-            var cartItems = _context.CartItems
+            var cartItems = context.CartItems
                 .Include(p => p.Product)
                 .Where(x => x.UserId == userId)
                 .ToList();
             return cartItems;
         }
 
-        public int AddItemToCart(CreateCartItemDto dto)
+        public CartItem GetCartItem(int cartItemId) {
+            var cartItem = context.CartItems
+                .Include(p => p.Product)
+                .FirstOrDefault(x => x.Id == cartItemId) ?? throw new NotFoundException("Cart item not found");
+            return cartItem;
+        }
+
+        public int AddCartItem(CreateCartItemDto dto, int userId)
         {
-            var existingCartItem = _context.CartItems
-                .FirstOrDefault(ci => ci.ProductId == dto.ProductId && ci.UserId == _userContextService.GetUserId());
+            var existingCartItem = context.CartItems
+                .FirstOrDefault(ci => ci.ProductId == dto.ProductId && ci.UserId == userId);
             CartItem cartItem;
             if (existingCartItem != null)
             {
@@ -51,47 +39,37 @@ namespace SmartShopAPI.Services
             }
             else
             {
-                cartItem = _mapper.Map<CartItem>(dto);
-                cartItem.UserId = _userContextService.GetUserId();
-                _context.CartItems.Add(cartItem);
+                cartItem = mapper.Map<CartItem>(dto);
+                cartItem.UserId = userId;
+                context.CartItems.Add(cartItem);
             }
-            _context.SaveChanges();
+            context.SaveChanges();
             return cartItem.Id;
         }
 
-        public void DeleteItemFromCart(int cartItemId)
+        public void DeleteCartItem(int cartItemId)
         {
-            var cartItem = _context.CartItems
+            var cartItem = context.CartItems
                 .FirstOrDefault(x => x.Id == cartItemId) ?? throw new NotFoundException("Cart item not found"); 
-            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, cartItem,
-                new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
-            if (!authorizationResult.Succeeded)
-            {
-                throw new ForbidException("Authorization failed");    
-            }
-            _context.CartItems.Remove(cartItem);
-            _context.SaveChanges();
+
+            context.CartItems.Remove(cartItem);
+            context.SaveChanges();
         }
 
         public void UpdateCartItem(int cartItemId, UpdateCartItemDto dto)
         {
-            var cartItem = _context.CartItems
+            var cartItem = context.CartItems
                 .FirstOrDefault(x => x.Id == cartItemId) ?? throw new NotFoundException("Cart item not found");         
-            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, cartItem,
-                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
-            if (!authorizationResult.Succeeded)
-            {
-                throw new ForbidException("Authorization failed");
-            }
+
             cartItem.Quantity = dto.Quantity;
-            _context.SaveChanges();
+            context.SaveChanges();
         }
 
         public void ClearCartItems(int userId)
         {
-            var cartItems = _context.CartItems.Where(c => c.UserId == userId);
-            _context.RemoveRange(cartItems);
-            _context.SaveChanges();
+            var cartItems = context.CartItems.Where(c => c.UserId == userId);
+            context.RemoveRange(cartItems);
+            context.SaveChanges();
         }
     }
 }
