@@ -1,6 +1,6 @@
 ﻿using SmartShopAPI.Entities;
 
-namespace SmartShopAPI.Interfaces
+namespace SmartShopAPI.Interfaces.Services
 {
     public interface IOrderService
     {

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace SmartShopAPI.Interfaces
+namespace SmartShopAPI.Interfaces.Services
 {
     public interface IUserContextService
     {

@@ -1,7 +1,7 @@
 ﻿using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 
-namespace SmartShopAPI.Interfaces
+namespace SmartShopAPI.Interfaces.Services
 {
     public interface IAccountService
     {

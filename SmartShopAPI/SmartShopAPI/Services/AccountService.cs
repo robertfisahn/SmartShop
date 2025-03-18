@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 using System.IdentityModel.Tokens.Jwt;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 

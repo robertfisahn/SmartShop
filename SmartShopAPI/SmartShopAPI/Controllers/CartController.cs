@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos.CartItem;
 
 namespace SmartShopAPI.Controllers
@@ -80,7 +80,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(404)]
         public ActionResult ClearCart()
         {
-            cartService.ClearCartItems(userContextService.GetUserId());
+            cartService.ClearCart(userContextService.GetUserId());
             return NoContent();
         }
     }

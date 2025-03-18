@@ -3,9 +3,9 @@ using SmartShopAPI.Data;
 using SmartShopAPI.Models;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Interfaces;
 using SmartShopAPI.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
+using SmartShopAPI.Interfaces.Services;
 
 namespace SmartShopAPI.Services
 {

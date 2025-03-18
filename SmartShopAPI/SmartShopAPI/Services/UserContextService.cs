@@ -1,5 +1,5 @@
 ﻿using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using System.Security.Claims;
 
 namespace SmartShopAPI.Services
