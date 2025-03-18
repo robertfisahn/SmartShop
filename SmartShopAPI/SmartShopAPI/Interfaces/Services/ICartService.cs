@@ -1,7 +1,7 @@
 ﻿using SmartShopAPI.Entities;
 using SmartShopAPI.Models.Dtos.CartItem;
 
-namespace SmartShopAPI.Interfaces
+namespace SmartShopAPI.Interfaces.Services
 {
     public interface ICartService
     {
@@ -10,6 +10,6 @@ namespace SmartShopAPI.Interfaces
         CartItem GetCartItem(int cartItemId);
         void DeleteCartItem(int cartItemId);
         void UpdateCartItem(int cartItemId, UpdateCartItemDto dto);
-        void ClearCartItems(int userId);
+        void ClearCart(int userId);
     }
 }

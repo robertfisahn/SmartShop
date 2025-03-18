@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmartShopAPI.Data;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
 

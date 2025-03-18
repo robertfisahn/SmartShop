@@ -2,7 +2,7 @@
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
 
-namespace SmartShopAPI.Interfaces
+namespace SmartShopAPI.Interfaces.Services
 {
     public interface ICategoryService
     {

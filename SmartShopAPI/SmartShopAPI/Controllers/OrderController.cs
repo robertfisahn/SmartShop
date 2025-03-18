@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartShopAPI.Entities;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models;
 
 namespace SmartShopAPI.Controllers

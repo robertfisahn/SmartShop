@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 
 namespace SmartShopAPI.Authorization
 {

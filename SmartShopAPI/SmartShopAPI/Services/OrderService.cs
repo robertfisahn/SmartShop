@@ -5,7 +5,7 @@ using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Services;
 
 namespace SmartShopAPI.Services
 {
