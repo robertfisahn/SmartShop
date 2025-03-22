@@ -6,6 +6,7 @@ using SmartShopAPI.Models.Dtos.Product;
 using SmartShopAPI.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Entities;
 
 namespace SmartShopAPI.Services
 {
@@ -187,6 +188,18 @@ namespace SmartShopAPI.Services
             }
 
             return $"images/products/{fileName}";
+        }
+
+        public void UpdateStockQuantity(IEnumerable<OrderItem> orderItems)
+        {
+            foreach (var item in orderItems)
+            {
+                var product = _context.Products.SingleOrDefault(x => x.Id == item.ProductId);
+                if (product != null)
+                {
+                    product.StockQuantity -= item.Quantity;
+                }
+            }
         }
     }
 }

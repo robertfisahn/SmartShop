@@ -1,4 +1,5 @@
-﻿using SmartShopAPI.Models;
+﻿using SmartShopAPI.Entities;
+using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 
@@ -14,5 +15,6 @@ namespace SmartShopAPI.Interfaces.Services
         Task<ProductDto> GetByIdAsync(int productId);
         Task UpdateAsync(int productId, UpsertProductDto dto, IFormFile? file);
         Task CheckUniqueNameAsync(string productName, int? productId);
+        void UpdateStockQuantity(IEnumerable<OrderItem> orderItems);
     }
 }

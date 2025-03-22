@@ -2,20 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Services;
-using SmartShopAPI.Models;
 
 namespace SmartShopAPI.Controllers
 {
     [Route("/api/order")]
     [ApiController]
     [Authorize]
-    public class OrderController : ControllerBase
+    public class OrderController(IOrderService orderService, IUserContextService userContextService) : ControllerBase
     {
-        private readonly IOrderService _orderService;
-        public OrderController(IOrderService orderService) 
-        {
-            _orderService = orderService;
-        }
 
         [HttpPost]
         [ProducesResponseType(201)]
@@ -23,10 +17,10 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult Create()
+        public ActionResult CreateOrder()
         {
-            int id = _orderService.Create();
-            return CreatedAtAction(nameof(GetById), new { orderId = id }, new { orderId = id });
+            int id = orderService.AddOrder(userContextService.GetUserId());
+            return CreatedAtAction(nameof(GetOrderById), new { orderId = id }, new { orderId = id });
         }
 
         [HttpGet("{orderId}")]
@@ -34,10 +28,23 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult<Order> GetById([FromRoute]int orderId)
+        public ActionResult<Order> GetOrderById([FromRoute]int orderId)
         {
-            var order = _orderService.GetById(orderId);
+            var order = orderService.GetById(orderId);
+
             return Ok(order);
         }
+
+        [HttpGet]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        public ActionResult<IEnumerable<Order>> GetUserOrders()
+        {
+            var orders = orderService.GetUserOrders(userContextService.GetUserId());
+            return Ok(orders);
+        }
+
     }
 }

@@ -72,5 +72,13 @@ namespace SmartShopAPI.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             return new ResponseDto { Token = tokenHandler.WriteToken(token)};
         }
+
+        public int GetUserAddressId(int userId)
+        {
+            return context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.AddressId)
+                .SingleOrDefault() ?? throw new NotFoundException("User not found");
+        }
     }
 }

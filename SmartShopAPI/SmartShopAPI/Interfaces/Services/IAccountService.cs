@@ -6,6 +6,7 @@ namespace SmartShopAPI.Interfaces.Services
     public interface IAccountService
     {
         void RegisterUser(RegisterUserDto dto);
-        public ResponseDto GenerateJwt(LoginDto dto);
+        ResponseDto GenerateJwt(LoginDto dto);
+        int GetUserAddressId(int userId);
     }
 }
