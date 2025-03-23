@@ -8,7 +8,6 @@ namespace SmartShopAPI.Interfaces.Repositories
         IEnumerable<Order> GetUserOrders(int userId);
         Order? GetOrder(int orderId);
         void AddOrder(Order order);
-        void AddOrderItems(IEnumerable<OrderItem> orderItems);
         void SaveChanges();
     }
 }

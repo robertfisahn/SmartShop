@@ -17,8 +17,6 @@ namespace SmartShopAPI.Repositories
             .FirstOrDefault(o => o.Id == orderId);
         public void AddOrder(Order order) => context.Orders.Add(order);
 
-        public void AddOrderItems(IEnumerable<OrderItem> orderItems) => context.OrderItems.AddRange(orderItems);
-
         public void SaveChanges()
         {
             context.SaveChanges();

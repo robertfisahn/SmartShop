@@ -7,7 +7,7 @@ using SmartShopAPI.Interfaces.Services;
 namespace SmartShopAPI.Services
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService, 
-        IProductService productService, IAccountService accountService) : IOrderService
+        IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository) : IOrderService
     {
         public Order GetById(int orderId)
         {
@@ -53,7 +53,7 @@ namespace SmartShopAPI.Services
             {
                 item.OrderId = orderId;
             }
-            orderRepository.AddOrderItems(orderItems);
+            orderItemRepository.AddOrderItems(orderItems);
             return orderItems;
         }
     }
