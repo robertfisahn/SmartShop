@@ -8,7 +8,7 @@ namespace SmartShopAPI.Interfaces.Services
     {
         int Create(CategoryUpsertDto dto);
         void Delete(int categoryId);
-        IEnumerable<CategoryDto> GetAll();
+        List<CategoryDto> GetAll();
         CategoryDto GetCategory(int categoryId);
         void Update(int categoryId, CategoryUpsertDto dto);
     }
