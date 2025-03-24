@@ -12,9 +12,8 @@ namespace SmartShopAPI.Services
 
         public IEnumerable<CartItem> GetUserCart(int userId) => cartRepository.GetUserCart(userId);
 
-        public CartItem GetCartItem(int cartItemId) =>
+        public CartItem GetCartItem(int cartItemId) => 
             cartRepository.GetCartItem(cartItemId) ?? throw new NotFoundException("Cart item not found");
-
 
         public int AddCartItem(CreateCartItemDto dto, int userId)
         {

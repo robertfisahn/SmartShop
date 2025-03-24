@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
+using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
@@ -14,7 +13,7 @@ using System.Text;
 
 namespace SmartShopAPI.Services
 {
-    public class AccountService(SmartShopDbContext context, IMapper mapper, IPasswordHasher<User> passwordHasher,
+    public class AccountService(IUserRepository userRepository, IMapper mapper, IPasswordHasher<User> passwordHasher,
         AuthenticationSettings authenticationSettings) : IAccountService
     {
 
@@ -23,21 +22,13 @@ namespace SmartShopAPI.Services
             var user = mapper.Map<User>(dto);
             user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
             user.RoleId = 2;
-            context.Users.Add(user);
-            context.SaveChanges();
+            userRepository.Add(user);
+            userRepository.SaveChanges();
         }
 
         public ResponseDto GenerateJwt(LoginDto dto)
         {
-            var user = context.Users
-                .Include(u => u.Role)
-                .FirstOrDefault(u => u.Email == dto.Email);
-
-            if (user == null)
-            {
-                throw new BadRequestException("Invalid username");
-            }
-
+            var user = userRepository.GetByEmail(dto.Email) ?? throw new BadRequestException("Invalid username");
             var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
@@ -75,10 +66,7 @@ namespace SmartShopAPI.Services
 
         public int GetUserAddressId(int userId)
         {
-            return context.Users
-                .Where(u => u.Id == userId)
-                .Select(u => u.AddressId)
-                .SingleOrDefault() ?? throw new NotFoundException("User not found");
+            return userRepository.GetUserAddressId(userId) ?? throw new NotFoundException("User not found");
         }
     }
 }
