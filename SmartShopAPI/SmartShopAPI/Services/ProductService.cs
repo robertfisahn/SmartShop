@@ -7,51 +7,38 @@ using SmartShopAPI.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Entities;
+using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Repositories;
 
 namespace SmartShopAPI.Services
 {
-    public class ProductService : IProductService
+    public class ProductService(IProductRepository productRepository, IMapper mapper, ICategoryRepository categoryRepository) : IProductService
     {
-        private readonly SmartShopDbContext _context;
-        private readonly IMapper _mapper;
-
-        public ProductService(SmartShopDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
         public async Task<List<ProductDto>> GetAllProductsAsync()
         {
-            var products = await _context.Products.Include(c => c.Category).ToListAsync();
-            return _mapper.Map<List<ProductDto>>(products);
+            return mapper.Map<List<ProductDto>>(await productRepository.GetAllAsync());
         }
 
         public async Task<List<ProductDto>> GetProductsAsync(string searchPhrase)
         {
-            var products = await _context.Products.Where(p => p.Name.ToLower().Contains(searchPhrase.ToLower())).ToListAsync();
-
-            return _mapper.Map<List<ProductDto>>(products);
+            return mapper.Map<List<ProductDto>>(await productRepository.GetBySearchPhraseAsync(searchPhrase));
         }
 
         public async Task<PagedResult<ProductDto>> GetAsync(int categoryId, QueryParams query)
         {
             await CheckCategory(categoryId);
 
-            var filteredProducts = await FilterProducts(categoryId, query.SearchPhrase);
+            var filteredProducts = await productRepository.GetByCategoryAndSearchPhraseAsync(categoryId, query.SearchPhrase);
             var paginatedAndSortedProducts = PaginateProducts(SortProducts(filteredProducts, query.SortOrder, query.SortBy),
                 query.PageSize, query.PageNumber);
 
-            var dtos = _mapper.Map<List<ProductDto>>(paginatedAndSortedProducts);
+            var dtos = mapper.Map<List<ProductDto>>(paginatedAndSortedProducts);
             return new PagedResult<ProductDto>(dtos, filteredProducts.Count(), query.PageSize, query.PageNumber);
         }
 
         public async Task<ProductDto> GetByIdAsync(int productId)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(x => x.Id == productId) ?? throw new NotFoundException("Product not found");
-
-            return _mapper.Map<ProductDto>(product);
+            return mapper.Map<ProductDto>(await productRepository.GetByIdAsync(productId));
         }
 
         public async Task<int> CreateAsync(UpsertProductDto dto, IFormFile? file)
@@ -59,55 +46,81 @@ namespace SmartShopAPI.Services
             await CheckCategory(dto.CategoryId);
             await CheckUniqueNameAsync(dto.Name, null);
 
-            var product = _mapper.Map<Product>(dto);
+            var product = mapper.Map<Product>(dto);
             product.ImagePath = file != null ? await SaveImageAsync(file) : "images/products/default.jpg";
 
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
+            await productRepository.AddAsync(product);
+            await productRepository.SaveChangesAsync();
             return product.Id;
+        }
+
+        public async Task CheckUniqueNameAsync(string productName, int? productId)
+        {
+            if (await productRepository.ExistsByNameAsync(productName, productId))
+            {
+                throw new BadRequestException("Product with the same name already exists.");
+            }
+        }
+
+        private async Task CheckCategory(int categoryId)
+        {
+            if (!await categoryRepository.ExistsAsync(categoryId))
+            {
+                throw new NotFoundException("Category not found");
+            }
+        }
+
+        public async Task<string?> SaveImageAsync(IFormFile file)
+        {
+            var folderPath = Path.Combine("wwwroot", "images");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine("wwwroot/images/products", fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return $"images/products/{fileName}";
         }
 
         public async Task DeleteAsync(int productId)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new NotFoundException("Product not found");
+            var product = await productRepository.GetByIdAsync(productId) ?? throw new NotFoundException("Product not found");
             if (!IsDefaultImage(product.ImagePath))
             {
                 DeleteFile(product.ImagePath!);
             }
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            productRepository.Delete(product);
+            await productRepository.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(int productId, UpsertProductDto dto, IFormFile? file)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(x => x.Id == productId) ?? throw new NotFoundException("Product not found");
-            
+            var product = await productRepository.GetByIdAsync(productId) ?? throw new NotFoundException("Product not found");
+
             await CheckUniqueNameAsync(dto.Name, productId);
             product.UpdatedDate = DateTime.Now;
             if (file != null)
             {
-                await UpdateProductImageAsync(product, dto, file);
+                if (!IsDefaultImage(product.ImagePath))
+                {
+                    DeleteFile(product.ImagePath!);
+                }
+                product.ImagePath = await SaveImageAsync(file);
             }
-            _mapper.Map(dto, product);
-            await _context.SaveChangesAsync();
+            mapper.Map(dto, product);
+            await productRepository.SaveChangesAsync();
         }
 
         private bool IsDefaultImage(string? imagePath)
         {
             var defaultPath = "images/products/default.jpg";
             return imagePath == defaultPath;
-        }
-
-        private async Task UpdateProductImageAsync(Product product, UpsertProductDto dto, IFormFile file)
-        {
-            if (!IsDefaultImage(product.ImagePath))
-            {
-                DeleteFile(product.ImagePath!);
-            }
-
-            dto.ImagePath = await SaveImageAsync(file);
         }
 
         public void DeleteFile(string imagePath)
@@ -117,32 +130,6 @@ namespace SmartShopAPI.Services
             {
                 File.Delete(fullImagePath);
             }
-        }
-
-        public async Task CheckUniqueNameAsync(string productName, int? productId)
-        {
-            bool productExists = await _context.Products
-                .AnyAsync(p => p.Name == productName && (productId == null || p.Id != productId));
-            if (productExists)
-            {
-                throw new BadRequestException("Product with the same name already exists.");
-            }
-        }
-
-        public async Task CheckCategory(int categoryId)
-        {
-            if(!await _context.Categories.AnyAsync(x => x.Id == categoryId))
-            {
-                throw new NotFoundException("Category not found");
-            }
-        }
-
-        public async Task<List<Product>> FilterProducts(int categoryId, string? searchPhrase)
-        {
-            var products = await _context.Products
-                .Where(x => x.CategoryId == categoryId && (searchPhrase == null || x.Name.ToLower().Contains(searchPhrase.ToLower())))
-                .ToListAsync();
-            return products;
         }
 
         public List<Product> SortProducts(List<Product> products, SortOrder sortOrder, string sortBy)
@@ -172,34 +159,6 @@ namespace SmartShopAPI.Services
             return result;
         }
 
-        public async Task<string?> SaveImageAsync(IFormFile file)
-        {
-            var folderPath = Path.Combine("wwwroot", "images");
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine("wwwroot/images/products", fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return $"images/products/{fileName}";
-        }
-
-        public void UpdateStockQuantity(IEnumerable<OrderItem> orderItems)
-        {
-            foreach (var item in orderItems)
-            {
-                var product = _context.Products.SingleOrDefault(x => x.Id == item.ProductId);
-                if (product != null)
-                {
-                    product.StockQuantity -= item.Quantity;
-                }
-            }
-        }
+        public async Task UpdateStockQuantityAsync(IEnumerable<OrderItem> orderItems) => await productRepository.UpdateStockQuantity(orderItems);
     }
 }

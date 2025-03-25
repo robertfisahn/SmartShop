@@ -20,7 +20,7 @@ namespace SmartShopAPI.Services
             var cartItems = cartService.GetUserCart(userId);
             Order order = CreateOrder(cartItems, userId);
             var orderItems = CreateOrderItems(cartItems, order.Id);
-            productService.UpdateStockQuantity(orderItems);
+            productService.UpdateStockQuantityAsync(orderItems);
             cartService.ClearCart(userId);
             orderRepository.SaveChanges();
             return order.Id;

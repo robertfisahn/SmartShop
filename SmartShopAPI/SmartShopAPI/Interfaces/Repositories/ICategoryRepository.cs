@@ -10,6 +10,7 @@ namespace SmartShopAPI.Interfaces.Repositories
         void Create(Category category);
         void Delete(Category category);
         void Update(Category category);
+        Task<bool> ExistsAsync(int categoryId);
         void SaveChanges();
     }
 }
