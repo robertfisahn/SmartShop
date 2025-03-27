@@ -5,12 +5,11 @@ namespace SmartShopAPI.Interfaces.Repositories
 {
     public interface ICategoryRepository
     {
-        List<Category> GetAll();
-        Category? GetCategory(int categoryId);
-        void Create(Category category);
+        Task<List<Category>> GetAllAsync();
+        Task<Category?> GetAsync(int categoryId);
+        Task AddAsync(Category category);
         void Delete(Category category);
-        void Update(Category category);
         Task<bool> ExistsAsync(int categoryId);
-        void SaveChanges();
+        Task SaveChangesAsync();
     }
 }

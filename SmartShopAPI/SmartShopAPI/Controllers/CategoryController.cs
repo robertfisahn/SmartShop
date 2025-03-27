@@ -2,38 +2,31 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos.Category;
+using System.Threading.Tasks;
 
 namespace SmartShopAPI.Controllers
 {
     [Route("api/category")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class CategoryController : ControllerBase
+    public class CategoryController(ICategoryService categoryService) : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
-        
-        public CategoryController(ICategoryService categoryService)
-        {
-            _categoryService = categoryService;
-        }
 
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        public ActionResult<IEnumerable<CategoryDto>> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
         {
-            var categories = _categoryService.GetAll();
-            return Ok(categories);
+            return Ok(await categoryService.GetAll());
         }
 
         [HttpGet("{categoryId}")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public ActionResult<CategoryDto> GetCategory([FromRoute]int categoryId)
+        public async Task<ActionResult<CategoryDto>> GetCategory([FromRoute]int categoryId)
         {
-            var category = _categoryService.GetCategory(categoryId);
-            return Ok(category);
+            return Ok(await categoryService.GetById(categoryId));
         }
 
         [HttpPost]
@@ -41,9 +34,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        public ActionResult Create([FromBody]CategoryUpsertDto dto) 
+        public async Task<ActionResult> Create([FromBody]CategoryUpsertDto dto) 
         {
-            var categoryId = _categoryService.Create(dto);
+            var categoryId = await categoryService.Create(dto);
             return Created($"category/{categoryId}", null);
         }
 
@@ -52,9 +45,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult Delete([FromRoute]int categoryId)
+        public async Task<ActionResult> Delete([FromRoute]int categoryId)
         {
-            _categoryService.Delete(categoryId);
+            await categoryService.Delete(categoryId);
             return NoContent();
         }
 
@@ -64,9 +57,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult Update([FromRoute]int categoryId, [FromBody]CategoryUpsertDto dto)
+        public async Task<ActionResult> Update([FromRoute]int categoryId, [FromBody]CategoryUpsertDto dto)
         {
-            _categoryService.Update(categoryId, dto);
+            await categoryService.Update(categoryId, dto);
             return Ok();
         }
     }

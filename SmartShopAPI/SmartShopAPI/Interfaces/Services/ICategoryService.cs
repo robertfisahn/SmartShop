@@ -6,10 +6,10 @@ namespace SmartShopAPI.Interfaces.Services
 {
     public interface ICategoryService
     {
-        int Create(CategoryUpsertDto dto);
-        void Delete(int categoryId);
-        List<CategoryDto> GetAll();
-        CategoryDto GetCategory(int categoryId);
-        void Update(int categoryId, CategoryUpsertDto dto);
+        Task<int> Create(CategoryUpsertDto dto);
+        Task<List<CategoryDto>> GetAll();
+        Task<CategoryDto> GetById(int categoryId);
+        Task Update(int categoryId, CategoryUpsertDto dto);
+        Task Delete(int categoryId);
     }
 }

@@ -10,36 +10,35 @@ namespace SmartShopAPI.Services
 {
     public class CategoryService(ICategoryRepository categoryRepository, IMapper mapper) : ICategoryService
     {
-        public List<CategoryDto> GetAll()
+        public async Task<List<CategoryDto>> GetAll()
         {
-            var categories = categoryRepository.GetAll();
+            var categories = await categoryRepository.GetAllAsync();
             return mapper.Map<List<CategoryDto>>(categories);
         }
 
-        public CategoryDto GetCategory(int categoryId)
+        public async Task<CategoryDto> GetById(int categoryId)
         {
-            var category = categoryRepository.GetCategory(categoryId) ?? throw new NotFoundException("Category not found");
+            var category = await categoryRepository.GetAsync(categoryId) ?? throw new NotFoundException("Category not found");
             return mapper.Map<CategoryDto>(category);
         }
-        public int Create(CategoryUpsertDto dto)
+        public async Task<int> Create(CategoryUpsertDto dto)
         {
             var category = mapper.Map<Category>(dto);
-            categoryRepository.Create(category);
-            categoryRepository.SaveChanges();
+            await categoryRepository.AddAsync(category);
+            await categoryRepository.SaveChangesAsync();
             return category.Id;
         }
-        public void Delete(int categoryId)
+        public async Task Delete(int categoryId)
         {
-            var category = categoryRepository.GetCategory(categoryId) ?? throw new NotFoundException("Category not found");
+            var category = await categoryRepository.GetAsync(categoryId) ?? throw new NotFoundException("Category not found");
             categoryRepository.Delete(category);
-            categoryRepository.SaveChanges();
+            await categoryRepository.SaveChangesAsync();
         }
-        public void Update(int categoryId, CategoryUpsertDto dto)
+        public async Task Update(int categoryId, CategoryUpsertDto dto)
         {
-            var category = categoryRepository.GetCategory(categoryId) ?? throw new NotFoundException("Category not found");
+            var category = await categoryRepository.GetAsync(categoryId) ?? throw new NotFoundException("Category not found");
             mapper.Map(dto, category);
-            categoryRepository.Update(category);
-            categoryRepository.SaveChanges();
+            await categoryRepository.SaveChangesAsync();
         }
     }
 }
