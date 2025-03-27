@@ -5,8 +5,9 @@ namespace SmartShopAPI.Interfaces.Services
 {
     public interface IAccountService
     {
-        void RegisterUser(RegisterUserDto dto);
-        ResponseDto GenerateJwt(LoginDto dto);
-        int GetUserAddressId(int userId);
+        Task<bool> EmailExistsAsync(string email);
+        Task RegisterUser(RegisterUserDto dto);
+        Task<ResponseDto> GenerateJwt(LoginDto dto);
+        Task<int> GetAddressId(int userId);
     }
 }

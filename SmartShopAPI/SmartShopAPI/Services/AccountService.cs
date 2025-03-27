@@ -14,25 +14,29 @@ using System.Text;
 namespace SmartShopAPI.Services
 {
     public class AccountService(IUserRepository userRepository, IMapper mapper, IPasswordHasher<User> passwordHasher,
-        AuthenticationSettings authenticationSettings) : IAccountService
+        AuthenticationSettings authenticationSettings, IRoleService roleService) : IAccountService
     {
 
-        public void RegisterUser(RegisterUserDto dto)
+        public async Task RegisterUser(RegisterUserDto dto)
         {
+            if (await EmailExistsAsync(dto.Email))
+            {
+                throw new BadRequestException("That email is already taken");
+            }
             var user = mapper.Map<User>(dto);
             user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
-            user.RoleId = 2;
-            userRepository.Add(user);
-            userRepository.SaveChanges();
+            user.RoleId = await roleService.GetUserRoleIdAsync();
+            await userRepository.AddAsync(user);
+            await userRepository.SaveChangesAsync();
         }
 
-        public ResponseDto GenerateJwt(LoginDto dto)
+        public async Task<ResponseDto> GenerateJwt(LoginDto dto)
         {
-            var user = userRepository.GetByEmail(dto.Email) ?? throw new BadRequestException("Invalid username");
+            var user = await userRepository.GetByEmailAsync(dto.Email) ?? throw new BadRequestException("Invalid email or password");
             var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                throw new BadRequestException("Invalid username or password");
+                throw new BadRequestException("Invalid email or password");
             }
 
             var claims = new List<Claim>()
@@ -64,9 +68,11 @@ namespace SmartShopAPI.Services
             return new ResponseDto { Token = tokenHandler.WriteToken(token)};
         }
 
-        public int GetUserAddressId(int userId)
+        public async Task<int> GetAddressId(int userId)
         {
-            return userRepository.GetUserAddressId(userId) ?? throw new NotFoundException("User not found");
+            return await userRepository.GetAddressIdAsync(userId) ?? throw new NotFoundException("User not found");
         }
+
+        public async Task<bool> EmailExistsAsync(string userEmail) => await userRepository.EmailExistsAsync(userEmail);
     }
 }

@@ -4,9 +4,10 @@ namespace SmartShopAPI.Interfaces.Repositories
 {
     public interface IUserRepository
     {
-        User? GetByEmail(string email);
-        int? GetUserAddressId(int userId);
-        void Add(User user);
-        void SaveChanges();
+        Task<User?> GetByEmailAsync(string email);
+        Task<int?> GetAddressIdAsync(int userId);
+        Task AddAsync(User user);
+        Task<bool> EmailExistsAsync(string email);
+        Task SaveChangesAsync();
     }
 }

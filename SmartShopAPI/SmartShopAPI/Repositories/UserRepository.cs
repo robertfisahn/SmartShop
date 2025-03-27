@@ -7,9 +7,14 @@ namespace SmartShopAPI.Repositories
 {
     public class UserRepository(SmartShopDbContext context) : IUserRepository
     {
-        public User? GetByEmail(string email) => context.Users.Include(u => u.Role).FirstOrDefault(u => u.Email == email);
-        public int? GetUserAddressId(int userId) => context.Users.Where(u => u.Id == userId).Select(u => u.AddressId).SingleOrDefault();
-        public void Add(User user) => context.Users.Add(user);
-        public void SaveChanges() => context.SaveChanges();
+        public async Task<User?> GetByEmailAsync(string email) => 
+            await context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == email);
+        public async Task<int?> GetAddressIdAsync(int userId) => 
+            await context.Users.Where(u => u.Id == userId).Select(u => u.AddressId).SingleOrDefaultAsync();
+        public async Task AddAsync(User user) => 
+            await context.Users.AddAsync(user);
+        public async Task<bool> EmailExistsAsync(string email)
+        => await context.Users.AnyAsync(u => u.Email == email);
+        public async Task SaveChangesAsync() => await context.SaveChangesAsync();
     }
 }

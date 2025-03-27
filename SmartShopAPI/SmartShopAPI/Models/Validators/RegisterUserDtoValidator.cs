@@ -1,24 +1,27 @@
 ﻿using FluentValidation;
-using SmartShopAPI.Data;
 using SmartShopAPI.Models.Dtos.User;
 
 namespace SmartShopAPI.Models.Validators
 {
     public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto>
     {
-        public RegisterUserDtoValidator(SmartShopDbContext dbContext)
+        public RegisterUserDtoValidator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
-            RuleFor(x => x.Password).MinimumLength(8);
-            RuleFor(x => x.ConfirmPassword).Equal(s => s.Password);
-            RuleFor(x => x.Email).Custom((value, context) =>
-                {
-                    var emailInUse = dbContext.Users.Any(x => x.Email == value);
-                    if (emailInUse)
-                    {
-                        context.AddFailure("Email", "That email is taken");
-                    }
-                });
+            RuleFor(x => x.Password)
+                .NotEmpty()
+                .MinimumLength(8)
+                .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter")
+                .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter")
+                .Matches(@"\d").WithMessage("Password must contain at least one number")
+                .Matches(@"[\W]").WithMessage("Password must contain at least one special character");
+
+            RuleFor(x => x.ConfirmPassword)
+                .Equal(s => s.Password)
+                .WithMessage("Passwords do not match");
+
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .EmailAddress();
         }
     }
 }

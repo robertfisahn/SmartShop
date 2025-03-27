@@ -5,12 +5,12 @@ namespace SmartShopAPI.Models.Dtos.User
 {
     public class RegisterUserDto
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string ConfirmPassword { get; set; }
-        public string City { get; set; }
-        public string Street { get; set; }
-        public string PostalCode { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
+        public required string ConfirmPassword { get; set; }
+        public required string City { get; set; }
+        public required string Street { get; set; }
+        public required string PostalCode { get; set; }
 
     }
 }
