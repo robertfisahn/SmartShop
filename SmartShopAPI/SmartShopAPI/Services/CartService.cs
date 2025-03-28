@@ -10,51 +10,50 @@ namespace SmartShopAPI.Services
     public class CartService(ICartRepository cartRepository, IMapper mapper) : ICartService
     {
 
-        public IEnumerable<CartItem> GetUserCart(int userId) => cartRepository.GetUserCart(userId);
+        public async Task<IEnumerable<CartItem>> GetCart(int userId) => await cartRepository.GetCartAsync(userId);
 
-        public CartItem GetCartItem(int cartItemId) => 
-            cartRepository.GetCartItem(cartItemId) ?? throw new NotFoundException("Cart item not found");
+        public async Task<CartItem> GetCartItemById(int cartItemId) => 
+            await cartRepository.GetCartItemByIdAsync(cartItemId) ?? throw new NotFoundException("Cart item not found");
 
-        public int AddCartItem(CreateCartItemDto dto, int userId)
+        public async Task<int> AddCartItem(CreateCartItemDto dto, int userId)
         {
-            var existingCartItem = cartRepository.GetCartItemByUserAndProduct(userId, dto.ProductId);
+            var existingCartItem = await cartRepository.GetCartItemByUserAndProductAsync(userId, dto.ProductId);
 
             if (existingCartItem != null)
             {
                 existingCartItem.Quantity += dto.Quantity;
-                cartRepository.UpdateCartItem(existingCartItem);
             }
             else
             {
                 var newCartItem = mapper.Map<CartItem>(dto);
                 newCartItem.UserId = userId;
-                cartRepository.AddCartItem(newCartItem);
+                await cartRepository.AddCartItemAsync(newCartItem);
                 existingCartItem = newCartItem;
             }
-            cartRepository.SaveChanges();
+            await cartRepository.SaveChangesAsync();
             return existingCartItem.Id;
         }
 
-        public void DeleteCartItem(int cartItemId)
+        public async Task DeleteCartItem(int cartItemId)
         {
-            var cartItem = cartRepository.GetCartItem(cartItemId) ?? throw new NotFoundException("Cart item not found");
+            var cartItem = await cartRepository.GetCartItemByIdAsync(cartItemId) ?? throw new NotFoundException("Cart item not found");
 
             cartRepository.DeleteCartItem(cartItem);
-            cartRepository.SaveChanges();
+            await cartRepository.SaveChangesAsync();
         }
 
-        public void UpdateCartItem(int cartItemId, UpdateCartItemDto dto)
+        public async Task UpdateCartItem(int cartItemId, UpdateCartItemDto dto)
         {
-            var cartItem = cartRepository.GetCartItem(cartItemId) ?? throw new NotFoundException("Cart item not found");
+            var cartItem = await cartRepository.GetCartItemByIdAsync(cartItemId) ?? throw new NotFoundException("Cart item not found");
 
             cartItem.Quantity = dto.Quantity;
-            cartRepository.SaveChanges();
+            await cartRepository.SaveChangesAsync();
         }
 
-        public void ClearCart(int userId)
+        public async Task ClearCart(int userId)
         {
-            cartRepository.ClearCart(userId);
-            cartRepository.SaveChanges();
+            await cartRepository.ClearCartAsync(userId);
+            await cartRepository.SaveChangesAsync();
         }
     }
 }

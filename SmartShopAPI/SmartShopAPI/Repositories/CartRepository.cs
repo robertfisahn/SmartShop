@@ -7,42 +7,32 @@ namespace SmartShopAPI.Repositories
 {
     public class CartRepository(SmartShopDbContext context) : ICartRepository
     {
-        public IEnumerable<CartItem> GetUserCart(int userId) =>
-            context.CartItems.Include(p => p.Product).Where(x => x.UserId == userId).ToList();
+        public async Task<IEnumerable<CartItem>> GetCartAsync(int userId) =>
+            await context.CartItems.Include(p => p.Product).Where(x => x.UserId == userId).ToListAsync();
 
-        public CartItem? GetCartItem(int cartItemId) =>
-            context.CartItems.Include(p => p.Product).FirstOrDefault(x => x.Id == cartItemId);
+        public async Task<CartItem?> GetCartItemByIdAsync(int cartItemId) =>
+            await context.CartItems.Include(p => p.Product).FirstOrDefaultAsync(x => x.Id == cartItemId);
 
-        public CartItem? GetCartItemByUserAndProduct(int userId, int productId)
-        {
-            return context.CartItems
-                .FirstOrDefault(ci => ci.UserId == userId && ci.ProductId == productId);
-        }
+        public async Task<CartItem?> GetCartItemByUserAndProductAsync(int userId, int productId) => 
+            await context.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
 
-        public void AddCartItem(CartItem cartItem)
-        {
-            context.CartItems.Add(cartItem);
-        }
+        public async Task AddCartItemAsync(CartItem cartItem) =>
+            await context.CartItems.AddAsync(cartItem);
 
         public void DeleteCartItem(CartItem cartItem)
         {
             context.CartItems.Remove(cartItem);
         }
 
-        public void UpdateCartItem(CartItem cartItem)
+        public async Task ClearCartAsync(int userId)
         {
-            context.CartItems.Update(cartItem);
-        }
-
-        public void ClearCart(int userId)
-        {
-            var cartItems = context.CartItems.Where(c => c.UserId == userId);
+            var cartItems = await context.CartItems.Where(c => c.UserId == userId).ToListAsync();
             context.RemoveRange(cartItems);
         }
 
-        public void SaveChanges()
+        public async Task SaveChangesAsync()
         {
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }

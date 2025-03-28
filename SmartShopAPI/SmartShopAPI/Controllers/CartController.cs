@@ -19,9 +19,8 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<CartItem>> GetCart() {
-            var cartItems = cartService.GetUserCart(userContextService.GetUserId());
-            return Ok(cartItems);
+        public async Task<ActionResult<IEnumerable<CartItem>>> GetCart() {
+            return Ok(await cartService.GetCart(userContextService.GetUserId()));
         }
 
         [HttpPost("add")]
@@ -30,10 +29,10 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult AddItem([FromBody]CreateCartItemDto dto)
+        public async Task<ActionResult> AddCartItem([FromBody]CreateCartItemDto dto)
         {
-            var cartItemId = cartService.AddCartItem(dto, userContextService.GetUserId());
-            return Created($"api/cart/{cartItemId}", null);
+            var cartItemId = await cartService.AddCartItem(dto, userContextService.GetUserId());
+            return CreatedAtAction(nameof(GetCart), new { cartItemId }, null);
         }
 
         [HttpDelete("delete/{cartItemId}")]
@@ -41,16 +40,16 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult DeleteItem([FromRoute]int cartItemId) {
+        public async Task<ActionResult> DeleteCartItem([FromRoute]int cartItemId) {
 
-            var cartItem = cartService.GetCartItem(cartItemId);
-            var authorizationResult = authorizationService.AuthorizeAsync(userContextService.User, cartItem,
-                new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+            var cartItem = await cartService.GetCartItemById(cartItemId);
+            var authorizationResult = await authorizationService.AuthorizeAsync(userContextService.User, cartItem,
+                new ResourceOperationRequirement(ResourceOperation.Delete));
             if (!authorizationResult.Succeeded)
             {
                 throw new ForbidException("Authorization failed");
             }
-                cartService.DeleteCartItem(cartItemId);
+                await cartService.DeleteCartItem(cartItemId);
             return NoContent();
         }
 
@@ -60,16 +59,16 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult UpdateItem([FromRoute]int cartItemId, [FromBody]UpdateCartItemDto dto)
+        public async Task<ActionResult> UpdateCartItem([FromRoute]int cartItemId, [FromBody]UpdateCartItemDto dto)
         {
-            var cartItem = cartService.GetCartItem(cartItemId);
-            var authorizationResult = authorizationService.AuthorizeAsync(userContextService.User, cartItem,
-                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+            var cartItem = await cartService.GetCartItemById(cartItemId);
+            var authorizationResult = await authorizationService.AuthorizeAsync(userContextService.User, cartItem,
+                new ResourceOperationRequirement(ResourceOperation.Update));
             if (!authorizationResult.Succeeded)
             {
                 throw new ForbidException("Authorization failed");
             }
-            cartService.UpdateCartItem(cartItemId, dto);
+            await cartService.UpdateCartItem(cartItemId, dto);
             return Ok();
         }
 
@@ -78,9 +77,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult ClearCart()
+        public async Task<ActionResult> ClearCart()
         {
-            cartService.ClearCart(userContextService.GetUserId());
+            await cartService.ClearCart(userContextService.GetUserId());
             return NoContent();
         }
     }
