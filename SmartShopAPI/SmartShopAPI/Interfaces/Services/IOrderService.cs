@@ -4,8 +4,8 @@ namespace SmartShopAPI.Interfaces.Services
 {
     public interface IOrderService
     {
-        int AddOrder(int userId);
-        Order GetById(int id);
-        IEnumerable<Order> GetUserOrders(int userId);
+        Task<int> PlaceOrder(int userId);
+        Task<Order> GetById(int id);
+        Task<IEnumerable<Order>> GetUserOrders(int userId);
     }
 }

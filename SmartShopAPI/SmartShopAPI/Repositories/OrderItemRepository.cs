@@ -6,6 +6,6 @@ namespace SmartShopAPI.Repositories
 {
     public class OrderItemRepository(SmartShopDbContext context) : IOrderItemRepository
     {
-        public void AddOrderItems(IEnumerable<OrderItem> orderItems) => context.OrderItems.AddRange(orderItems);
+        public async Task AddOrderItemsAsync(List<OrderItem> orderItems) => await context.OrderItems.AddRangeAsync(orderItems);
     }
 }

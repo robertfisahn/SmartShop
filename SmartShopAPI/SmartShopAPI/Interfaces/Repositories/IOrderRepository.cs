@@ -4,10 +4,9 @@ namespace SmartShopAPI.Interfaces.Repositories
 {
     public interface IOrderRepository
     {
-
-        IEnumerable<Order> GetUserOrders(int userId);
-        Order? GetOrder(int orderId);
-        void AddOrder(Order order);
-        void SaveChanges();
+        Task<IEnumerable<Order>> GetUserOrdersAsync(int userId);
+        Task<Order?> GetAsync(int orderId);
+        Task AddAsync(Order order);
+        Task SaveChangesAsync();
     }
 }

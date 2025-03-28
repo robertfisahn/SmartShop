@@ -17,10 +17,10 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult CreateOrder()
+        public async Task<ActionResult> Create()
         {
-            int id = orderService.AddOrder(userContextService.GetUserId());
-            return CreatedAtAction(nameof(GetOrderById), new { orderId = id }, new { orderId = id });
+            var id = await orderService.PlaceOrder(userContextService.GetUserId());
+            return CreatedAtAction(nameof(GetById), new { orderId = id }, new { orderId = id });
         }
 
         [HttpGet("{orderId}")]
@@ -28,11 +28,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult<Order> GetOrderById([FromRoute]int orderId)
+        public async Task<ActionResult<Order>> GetById([FromRoute]int orderId)
         {
-            var order = orderService.GetById(orderId);
-
-            return Ok(order);
+            return Ok(await orderService.GetById(orderId));
         }
 
         [HttpGet]
@@ -40,10 +38,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<Order>> GetUserOrders()
+        public async Task<ActionResult<IEnumerable<Order>>> GetUserOrders()
         {
-            var orders = orderService.GetUserOrders(userContextService.GetUserId());
-            return Ok(orders);
+            return Ok(await orderService.GetUserOrders(userContextService.GetUserId()));
         }
 
     }
