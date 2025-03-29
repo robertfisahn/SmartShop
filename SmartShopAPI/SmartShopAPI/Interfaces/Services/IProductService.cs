@@ -1,5 +1,4 @@
 ﻿using SmartShopAPI.Entities;
-using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 
@@ -7,14 +6,14 @@ namespace SmartShopAPI.Interfaces.Services
 {
     public interface IProductService
     {
-        Task<int> CreateAsync(UpsertProductDto dto, IFormFile? file);
-        Task DeleteAsync(int productId);
-        Task<List<ProductDto>> GetAllProductsAsync();
-        Task<List<ProductDto>> GetProductsAsync(string searchPhrase);
-        Task<PagedResult<ProductDto>> GetAsync(int categoryId, QueryParams query);
-        Task<ProductDto> GetByIdAsync(int productId);
-        Task UpdateAsync(int productId, UpsertProductDto dto, IFormFile? file);
-        Task UpdateStockQuantityAsync(IEnumerable<OrderItem> orderItems);
-        Task CheckUniqueNameAsync(string productName, int? productId);
+        Task<int> Create(UpsertProductDto dto, IFormFile? file);
+        Task Delete(int productId);
+        Task<List<ProductDto>> GetAll();
+        Task<List<ProductDto>> Search(string searchPhrase);
+        Task<PagedResult<ProductDto>> GetByCategory(int categoryId, QueryParams query);
+        Task<ProductDto> GetById(int productId);
+        Task Update(int productId, UpsertProductDto dto, IFormFile? file);
+        Task UpdateStock(List<OrderItem> orderItems);
+        Task EnsureUniqueName(string productName, int? productId);
     }
 }
