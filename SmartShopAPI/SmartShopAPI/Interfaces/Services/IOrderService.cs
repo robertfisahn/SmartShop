@@ -1,4 +1,5 @@
 ﻿using SmartShopAPI.Entities;
+using SmartShopAPI.Models.Dtos.Order;
 
 namespace SmartShopAPI.Interfaces.Services
 {
@@ -6,6 +7,6 @@ namespace SmartShopAPI.Interfaces.Services
     {
         Task<int> PlaceOrder(int userId);
         Task<Order> GetById(int id);
-        Task<IEnumerable<Order>> GetUserOrders(int userId);
+        Task<IEnumerable<OrderDto>> GetUserOrders(int userId);
     }
 }

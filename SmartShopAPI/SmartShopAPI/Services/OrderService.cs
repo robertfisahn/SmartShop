@@ -3,6 +3,7 @@ using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Models.Dtos.Order;
 
 namespace SmartShopAPI.Services
 {
@@ -40,10 +41,10 @@ namespace SmartShopAPI.Services
             return order;
         }
 
-        public async Task<IEnumerable<Order>> GetUserOrders(int userId)
+        public async Task<IEnumerable<OrderDto>> GetUserOrders(int userId)
         {
             var orders = await orderRepository.GetUserOrdersAsync(userId);
-            return orders;
+            return mapper.Map<IEnumerable<OrderDto>>(orders);
         }
 
         private async Task<List<OrderItem>> CreateOrderItems(IEnumerable<CartItem> cartItems, int orderId)

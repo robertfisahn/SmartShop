@@ -32,10 +32,10 @@ export class OrderService {
   }
 
   getOrderById(orderId: number): Observable<Order> {
-    const token = sessionStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return this.http.get<Order>(`${this.apiUrl}/${orderId}`, { headers });
+    return this.http.get<Order>(`${this.apiUrl}/${orderId}`);
+  }
+
+  getUserOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}`);
   }
 }

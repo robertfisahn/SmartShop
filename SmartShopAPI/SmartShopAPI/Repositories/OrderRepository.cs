@@ -8,7 +8,12 @@ namespace SmartShopAPI.Repositories
     public class OrderRepository(SmartShopDbContext context) : IOrderRepository
     {
         public async Task<IEnumerable<Order>> GetUserOrdersAsync(int userId) =>
-            await context.Orders.Where(u => u.UserId == userId).ToListAsync();
+            await context.Orders
+            .Include(o => o.OrderItems)
+            .ThenInclude(i => i.Product)
+            .Include(o => o.Address)
+            .Where(o => o.UserId == userId)
+            .ToListAsync();
         public async Task<Order?> GetAsync(int orderId) =>
             await context.Orders
             .Include(o => o.OrderItems)

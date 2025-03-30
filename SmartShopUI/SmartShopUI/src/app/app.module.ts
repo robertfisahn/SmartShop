@@ -22,6 +22,7 @@ import { OrderDetailsComponent } from './components/order/order-details/order-de
 import { ProductCreateComponent } from './components/product/product-create/product-create.component';
 import { ProductUpdateComponent } from './components/product/product-update/product-update.component';
 import { ProductDeleteComponent } from './components/product/product-delete/product-delete.component';
+import { OrderHistoryComponent } from './components/order/order-history/order-history.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -35,6 +36,7 @@ import { ProductDeleteComponent } from './components/product/product-delete/prod
         OrderCreateComponent,
         OrderConfirmationComponent,
         OrderDetailsComponent,
+        OrderHistoryComponent,
         ProductCreateComponent,
         ProductUpdateComponent,
         ProductDeleteComponent

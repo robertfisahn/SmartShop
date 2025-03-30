@@ -47,19 +47,18 @@
 
 .dropdown {
   cursor: pointer;
-  color: white;
   border: 1px solid white;
   padding: 5px;
   border-radius: 5px;
+  color: white;
 }
 
   .dropdown:hover {
-      background-color: gray;
+    color: #4096f7
   }
 
 .dropdown-menu {
   position: absolute;
-  height: 100px;
   width: 50px;
   top: 110%;
   right: 0;
@@ -75,9 +74,13 @@
 
 .dropdown-item {
   padding: 10px;
-  border-bottom: 1px solid #444;
+  border-bottom: none;
   cursor: pointer;
 }
+
+  .dropdown-item:not(:last-child) {
+    border-bottom: 1px solid #444;
+  }
 
   .dropdown-item:hover {
     background-color: transparent;

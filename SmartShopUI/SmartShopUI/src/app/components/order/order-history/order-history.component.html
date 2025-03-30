@@ -1,0 +1,71 @@
+<div *ngIf="loading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Loading order history...</p>
+</div>
+
+<div *ngIf="error" class="error-container">
+  <i class="error-icon">!</i>
+  <p>{{ error }}</p>
+</div>
+
+<div class="order-history-container">
+  <div *ngIf="!loading && orders.length === 0" class="no-orders">
+    <i class="empty-icon">📦</i>
+    <p>No orders found. Start shopping to see your orders here!</p>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0" class="order-history">
+    <div class="header-section">
+      <h2 class="history-title">Order History</h2>
+      <p class="order-count">{{ orders.length }} orders found</p>
+    </div>
+
+    <div class="orders-list">
+      <div *ngFor="let order of orders" class="order-item">
+        <div class="order-header" (click)="toggleOrderItems(order)">
+          <div class="order-main-info">
+            <span class="order-number">Order #{{ order.id }}</span>
+            <span class="order-date">{{ order.createdDate | date:'MMM d, y' }}</span>
+          </div>
+          <div class="order-summary">
+            <span class="order-price">{{ order.totalPrice | currency }}</span>
+            <i class="expand-icon" [ngClass]="order.showMore ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'"></i>
+          </div>
+        </div>
+
+        <div class="order-details" [class.expanded]="order.showMore">
+          <div class="order-address">
+            <h4>Delivery Address</h4>
+            <p>{{ order.address }}</p>
+          </div>
+
+          <div class="order-products">
+            <h4>Products ({{ order.orderItems.length }})</h4>
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.orderItems">
+                  <td class="product-name">{{ item.productName || 'Product' }}</td>
+                  <td class="product-quantity">{{ item.quantity }}</td>
+                  <td class="product-price">{{ item.price | currency }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" class="total-label">Total</td>
+                  <td class="total-price">{{ order.totalPrice | currency }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

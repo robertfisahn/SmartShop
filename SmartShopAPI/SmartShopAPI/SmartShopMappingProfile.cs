@@ -3,6 +3,7 @@ using SmartShopAPI.Entities;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Models.Dtos.Category;
+using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Models.Dtos.Product;
 using SmartShopAPI.Models.Dtos.User;
 
@@ -33,7 +34,14 @@ namespace SmartShopAPI
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
             CreateMap<CartItem, OrderItem>()
                 .ForMember(d => d.Id, o => o.Ignore());
-
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate.ToString("yyyy-MM-dd")))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src =>
+                    src.Address != null ? $"{src.Address.Street}, {src.Address.City}, {src.Address.PostalCode}" : "No Address"))
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price));
         }
     }
 }
