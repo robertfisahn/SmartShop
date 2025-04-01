@@ -9,7 +9,8 @@ using SmartShopAPI.Interfaces.Repositories;
 
 namespace SmartShopAPI.Services
 {
-    public class ProductService(IProductRepository productRepository, IMapper mapper, ICategoryRepository categoryRepository) : IProductService
+    public class ProductService(IProductRepository productRepository, IMapper mapper,
+        ICategoryRepository categoryRepository, IFileService fileService) : IProductService
     {
         public async Task<List<ProductDto>> GetAll()
         {
@@ -35,7 +36,10 @@ namespace SmartShopAPI.Services
 
         public async Task<ProductDto> GetById(int productId)
         {
-            return mapper.Map<ProductDto>(await productRepository.GetByIdAsync(productId));
+            var product = await productRepository.GetByIdAsync(productId)
+                ?? throw new NotFoundException("Product not found");
+
+            return mapper.Map<ProductDto>(product);
         }
 
         public async Task<int> Create(UpsertProductDto dto, IFormFile? file)
@@ -44,7 +48,7 @@ namespace SmartShopAPI.Services
             await EnsureUniqueName(dto.Name, null);
 
             var product = mapper.Map<Product>(dto);
-            product.ImagePath = file != null ? await SaveImage(file) : "images/products/default.jpg";
+            product.ImagePath = file != null ? await fileService.SaveImageAsync(file) : "images/products/default.jpg";
 
             await productRepository.AddAsync(product);
             await productRepository.SaveChangesAsync();
@@ -67,30 +71,12 @@ namespace SmartShopAPI.Services
             }
         }
 
-        public async Task<string?> SaveImage(IFormFile file)
-        {
-            var folderPath = Path.Combine("wwwroot", "images");
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine("wwwroot/images/products", fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return $"images/products/{fileName}";
-        }
-
         public async Task Delete(int productId)
         {
             var product = await productRepository.GetByIdAsync(productId) ?? throw new NotFoundException("Product not found");
             if (!IsDefaultImage(product.ImagePath))
             {
-                RemoveImage(product.ImagePath!);
+                fileService.DeleteImage(product.ImagePath!);
             }
             productRepository.Delete(product);
             await productRepository.SaveChangesAsync();
@@ -106,9 +92,9 @@ namespace SmartShopAPI.Services
             {
                 if (!IsDefaultImage(product.ImagePath))
                 {
-                    RemoveImage(product.ImagePath!);
+                    fileService.DeleteImage(product.ImagePath!);
                 }
-                product.ImagePath = await SaveImage(file);
+                product.ImagePath = await fileService.SaveImageAsync(file);
             }
             mapper.Map(dto, product);
             await productRepository.SaveChangesAsync();
@@ -118,15 +104,6 @@ namespace SmartShopAPI.Services
         {
             var defaultPath = "images/products/default.jpg";
             return imagePath == defaultPath;
-        }
-
-        public void RemoveImage(string imagePath)
-        {
-            var fullImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", imagePath);
-            if (File.Exists(fullImagePath))
-            {
-                File.Delete(fullImagePath);
-            }
         }
 
         public List<Product> Sort(List<Product> products, SortOrder sortOrder, string sortBy)
