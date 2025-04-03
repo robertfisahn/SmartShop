@@ -1,210 +1,334 @@
 ﻿using Moq;
-using AutoMapper;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Services;
-using SmartShopAPI.Tests.Helpers;
-using SmartShopAPI.Data;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Models.Dtos;
-using Microsoft.EntityFrameworkCore;
-using Moq.EntityFrameworkCore;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using SmartShopAPI.Tests.Helpers;
 
-namespace SmartShopAPI.Tests
+namespace SmartShopAPI.Tests.UnitTests.ServiceTests
 {
-    public class ProductServiceUnitTests
+    public class ProductServiceUnitTests(ProductServiceFixture fixture) : IClassFixture<ProductServiceFixture>
     {
-        private readonly Mock<SmartShopDbContext> _mockContext;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly ProductService _service;
-        private readonly List<Product> _products;
-
-        public ProductServiceUnitTests()
+        [Fact]
+        public async Task GetAll_ReturnsAllProducts()
         {
-            _mockContext = MockDbContext.CreateMockDbContext();
-            _mockMapper = new Mock<IMapper>();
-            _service = new ProductService(_mockContext.Object, _mockMapper.Object);
+            fixture.ResetProducts();
+            var service = fixture.Service;
 
-            var categories = new List<Category> {
-                new () { Id = 1, Name = "PS4" },
-                new () { Id = 2, Name = "PS5" }
-             };
-            _products = new List<Product>
-            {
-                new () { Id = 1, Name = "The Last of Us Part II Remastered", Price = 199.99M, CategoryId = 2, ImagePath = "images/products/defaultt.jpg" },
-                new () { Id = 2, Name = "God of War", Price = 149.99M, CategoryId = 1 },
-                new () { Id = 3, Name = "Spider-Man 2", Price = 100.00M, CategoryId = 1 }
-            };
-            var mockProducts = MockDbContext.CreateMockDbSet(_products);
-            var mockCategories = MockDbContext.CreateMockDbSet(categories);
+            var products = await service.GetAll();
 
-            _mockContext.Setup(c => c.Products).ReturnsDbSet(mockProducts);
-            _mockContext.Setup(c => c.Categories).ReturnsDbSet(mockCategories);
-            _mockContext.Setup(c => c.Products.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
-                .Callback((Product p, CancellationToken ct) =>
-                {
-                    p.Id = _products.Max(x => x.Id) + 1;
-                    _products.Add(p);
-                });
-            _mockContext.Setup(c => c.Products.Remove(It.IsAny<Product>()))
+            products.Should().NotBeEmpty();
+            products.Should().HaveCount(3);
+            products[0].Name.Should().Be("Product1");
+        }
+
+        [Fact]
+        public async Task GetAll_WhenNoProducts_ReturnsEmptyList()
+        {
+            var service = fixture.Service;
+            fixture.MockProductRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Product>());
+
+            var products = await service.GetAll();
+
+            products.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetById_ExistingProduct()
+        {
+            fixture.ResetProducts();
+
+            var service = fixture.Service;
+
+            var existingProduct = await service.GetById(1);
+
+            existingProduct.Should().NotBeNull();
+            existingProduct.Id.Should().Be(1);
+            existingProduct.Name.Should().Be("Product1");
+        }
+
+        [Fact]
+        public async Task GetById_NonExistingProduct_ThrowsNotFoundException_WithCorrectMessage()
+        {
+            var service = fixture.Service;
+            var nonExistingProductId = 88;
+
+            fixture.MockProductRepository.Setup(r => r.GetByIdAsync(nonExistingProductId)).ReturnsAsync((Product?)null);
+
+            await FluentActions.Invoking(() => service.GetById(nonExistingProductId))
+                .Should().ThrowAsync<NotFoundException>()
+                .WithMessage("Product not found");
+        }
+
+        [Fact]
+        public async Task Search_WithMatchingPhrase_ReturnsNonEmptyListOfProductDto()
+        {
+            fixture.ResetProducts();
+            var service = fixture.Service;
+            var searchPhrase = "Product2";
+
+            var result = await service.Search(searchPhrase);
+
+            result.Should().NotBeEmpty();
+            result[0].Should().BeOfType<ProductDto>();
+        }
+
+
+        [Fact]
+        public async Task Search_ReturnsEmptyList_WhenNoMatchingProducts()
+        {
+            var service = fixture.Service;
+            var searchPhrase = "NonExistentProduct";
+
+            var result = await service.Search(searchPhrase);
+
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Create_WithValidData_ReturnsProductId()
+        {
+            fixture.ResetProducts();
+            fixture.MockProductRepository.Invocations.Clear();
+
+            fixture.MockProductRepository.Setup(r => r.AddAsync(It.IsAny<Product>()))
                 .Callback((Product p) =>
                 {
-                    var productToRemove = _products.FirstOrDefault(p => p.Id == p.Id);
-                    if (productToRemove != null)
-                    {
-                        _products.Remove(productToRemove);
-                    }
-                });
-            _mockMapper.Setup(m => m.Map<ProductDto>(It.IsAny<Product>()))
-                .Returns((Product source) => new ProductDto { Id = source.Id, Name = source.Name });
+                    var nextId = fixture.Products.Any() ? fixture.Products.Max(x => x.Id) + 1 : 1;
+                    p.Id = nextId;
+                    fixture.Products.Add(p);
+                })
+                .Returns(Task.CompletedTask);
 
-            _mockMapper.Setup(m => m.Map<Product>(It.IsAny<UpsertProductDto>()))
-                .Returns((UpsertProductDto dto) => new Product { Name = dto.Name, CategoryId = 1 });
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "New Product", CategoryId = 1 };
 
-            _mockMapper.Setup(m => m.Map(It.IsAny<UpsertProductDto>(), It.IsAny<Product>()))
-                .Callback((UpsertProductDto dto, Product product) => {
-                    product.Name = dto.Name;
-                });
+            var result = await service.Create(dto, null);
+
+            result.Should().Be(4);
+            fixture.MockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
 
-        [Theory]
-        [InlineData(1, false)]
-        [InlineData(88, true)]
-        public async Task CheckCategory_Validation(int categoryId, bool shouldThrow)
-        {
-            Func<Task> act = () => _service.CheckCategory(categoryId);
 
-            if (shouldThrow)
-            {
-                await act.Should().ThrowAsync<NotFoundException>();
-            }
-            else
-            {
-                await act.Should().NotThrowAsync();
-            }
+        [Fact]
+        public async Task Create_WithoutImage_SetsDefaultImagePath()
+        {
+            fixture.ResetProducts();
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "New Product", CategoryId = 1 };
+
+            Product? addedProduct = null;
+
+            fixture.MockProductRepository
+                .Setup(r => r.ExistsByNameAsync(dto.Name, null))
+                .ReturnsAsync(false);
+
+            fixture.MockProductRepository
+                .Setup(r => r.AddAsync(It.IsAny<Product>()))
+                .Callback((Product p) => addedProduct = p)
+                .Returns(Task.CompletedTask);
+
+            var result = await service.Create(dto, null);
+
+            addedProduct.Should().NotBeNull();
+            addedProduct!.ImagePath.Should().Be("images/products/default.jpg");
+        }
+
+
+
+
+        [Fact]
+        public async Task Create_WithImage_SavesImageAndSetImagePath()
+        {
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "New Product", CategoryId = 1 };
+            var mockFile = new Mock<IFormFile>();
+            var expectedImagePath = $"images/products/{mockFile.Object.FileName}";
+
+            fixture.MockProductRepository
+                .Setup(r => r.ExistsByNameAsync(dto.Name, null))
+                .ReturnsAsync(false);
+
+            fixture.MockFileService
+                .Setup(fs => fs.SaveImageAsync(mockFile.Object))
+                .ReturnsAsync(expectedImagePath);
+
+            var result = await service.Create(dto, mockFile.Object);
+
+            fixture.MockProductRepository.Verify(r => r.AddAsync(It.Is<Product>(p =>
+                p.ImagePath == expectedImagePath)), Times.Once);
+        }
+
+
+        [Fact]
+        public async Task Create_WithNonExistingCategory_ThrowsNotFoundException()
+        {
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "New Product", CategoryId = 999 };
+
+            fixture.MockCategoryRepository.Setup(r => r.ExistsAsync(dto.CategoryId)).ReturnsAsync(false);
+
+            await Assert.ThrowsAsync<NotFoundException>(() => service.Create(dto, null));
+            fixture.MockCategoryRepository.Verify(r => r.ExistsAsync(dto.CategoryId), Times.Once);
         }
 
         [Fact]
-        public async Task GetById_ExistingProduct() 
+        public async Task Create_WithDuplicateName_ThrowsBadRequestException()
         {
-            var existingProduct = await _service.GetByIdAsync(1);
-            Assert.NotNull(existingProduct);
-            Assert.Equal(1, existingProduct.Id);
-        }
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "Product1", CategoryId = 1 };
 
-        [Fact]
-        public async Task GetById_NonExistingProduct_ThrowsNotFoundException()
-        {
-            var nonExistingProductId = 88;
-            await Assert.ThrowsAsync<NotFoundException>(() => _service.GetByIdAsync(nonExistingProductId));
-        }
+            fixture.MockProductRepository.Setup(r => r.ExistsByNameAsync(dto.Name, null)).ReturnsAsync(true);
 
-        [Fact]
-        public async Task Create_Product_Successfully()
-        {
-            var newProduct = new UpsertProductDto { Name = "Spider-man 3", CategoryId = 1 };
-            var newProductId = await _service.CreateAsync(newProduct, null);
-            var createdProduct = await _service.GetByIdAsync(newProductId);
-            Assert.NotNull(createdProduct);
-            _mockContext.Verify(c => c.Products.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()), Times.Once);
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            await Assert.ThrowsAsync<BadRequestException>(() => service.Create(dto, null));
+            fixture.MockProductRepository.Verify(r => r.ExistsByNameAsync(dto.Name, null), Times.Once);
         }
 
         [Fact]
         public async Task Delete_Product_Successfully()
         {
-            var existingProduct = await _service.GetByIdAsync(1);
-            await _service.DeleteAsync(existingProduct.Id);
-            var productExists = _mockContext.Object.Products.Any(p => p.Id == existingProduct.Id);
-            Assert.False(productExists);
-            _mockContext.Verify(c => c.Products.Remove(It.Is<Product>(p => p.Id == existingProduct.Id)), Times.Once);
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            fixture.ResetProducts();
+            fixture.MockProductRepository.Invocations.Clear();
+            var service = fixture.Service;
+            var product = fixture.Products.First(p => p.Id == 1);
+
+            fixture.MockProductRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(product);
+
+            await service.Delete(1);
+
+            fixture.MockProductRepository.Verify(r => r.Delete(It.Is<Product>(p => p.Id == 1)), Times.Once);
+            fixture.MockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
         public async Task Delete_Product_NonExistingProduct_ThrowsNotFoundException()
         {
+            var service = fixture.Service;
             var nonExistingProductId = 88;
-            await Assert.ThrowsAsync<NotFoundException>(() =>  _service.DeleteAsync(nonExistingProductId));
+
+            fixture.MockProductRepository.Setup(r => r.GetByIdAsync(nonExistingProductId)).ReturnsAsync((Product?)null);
+
+            await FluentActions.Invoking(() => service.Delete(nonExistingProductId))
+                .Should().ThrowAsync<NotFoundException>()
+                .WithMessage("Product not found");
         }
 
         [Fact]
         public async Task Update_Product_Successfully()
         {
-            var dto = new UpsertProductDto { Name = "Update product" };
-            await _service.UpdateAsync(1, dto, null);
-            var updateProduct = await _mockContext.Object.Products.FirstOrDefaultAsync(p => p.Id == 1);
-            Assert.Equal("Update product", updateProduct.Name);
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            fixture.ResetProducts();
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "Updated product" };
+            var product = fixture.Products.First(p => p.Id == 1);
+
+            fixture.MockProductRepository.Invocations.Clear();
+            fixture.MockProductRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(product);
+
+            await service.Update(1, dto, null);
+
+            product.Name.Should().Be("Updated product");
+            fixture.MockMapper.Verify(m => m.Map(dto, It.IsAny<Product>()), Times.Once);
+            fixture.MockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
         public async Task Update_Product_NonExistingProduct_ThrowsNotFoundException()
         {
-            var nonExistingProductId = 99;
-            var dto = new UpsertProductDto { Name = "Update Product" };
-            await Assert.ThrowsAsync<NotFoundException>(() => _service.UpdateAsync(nonExistingProductId, dto, null));
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
-        }
+            var service = fixture.Service;
+            var dto = new UpsertProductDto { Name = "Updated Product" };
+            var nonExistingId = 99;
 
-        [Fact]
-        public async Task FilterProducts_ReturnsFilteredProducts()
-        {
-            var result = await _service.FilterProducts(1, "Spider");
-            Assert.Single(result);
-            Assert.Equal("Spider-Man 2", result[0].Name);
+            fixture.MockProductRepository.Invocations.Clear();
+            fixture.MockProductRepository.Setup(r => r.GetByIdAsync(nonExistingId)).ReturnsAsync((Product?)null);
+
+            await Assert.ThrowsAsync<NotFoundException>(() => service.Update(nonExistingId, dto, null));
+            fixture.MockProductRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
         public void PaginateProducts_PaginatesCorrectly()
         {
-            _products.Add(new Product { Id = 4, Name = "Grand Theft Auto V", Price = 100.00M, CategoryId = 1 });
-            int pageNumber = 2;
-            int pageSize = 2;
-            var paginated = _service.PaginateProducts(_products, pageNumber, pageSize);
+            var service = fixture.Service;
+            fixture.Products.Add(new Product { Id = 4, Name = "Product4", Price = 100.00M, CategoryId = 1 });
+
+            var paginated = service.Paginate(fixture.Products, 2, 2);
+
             Assert.Equal(2, paginated.Count);
-            Assert.Equal("Grand Theft Auto V", paginated[1].Name);
+            Assert.Equal("Product4", paginated[1].Name);
         }
 
         [Fact]
         public void SortProducts_ByNameAscending()
         {
-            var sortBy = "Name";
-            var sortOrder = SortOrder.Ascending;
-            var sort = _service.SortProducts(_products, sortOrder, sortBy).ToList();
-            Assert.Equal("God of War", sort[0].Name);
-            Assert.Equal("The Last of Us Part II Remastered", sort[2].Name);
+            var service = fixture.Service;
+            fixture.Products.Clear();
+            fixture.Products.AddRange(
+            [
+                new Product { Name = "Product3", Price = 299.99M },
+                new Product { Name = "Product2", Price = 199.99M },
+                new Product { Name = "Product1", Price = 249.99M },
+            ]);
+
+            var sorted = service.Sort(fixture.Products, SortOrder.Ascending, "Name").ToList();
+
+            Assert.Equal("Product1", sorted[0].Name);
+            Assert.Equal("Product3", sorted[2].Name);
         }
 
         [Fact]
         public void SortProducts_ByPriceAscending()
-        {   
-            var sortBy = "Price";
-            var sortOrder = SortOrder.Ascending;
-            var sort = _service.SortProducts(_products, sortOrder, sortBy).ToList();
-            Assert.Equal("Spider-Man 2", sort[0].Name);
-            Assert.Equal("The Last of Us Part II Remastered", sort[2].Name);
+        {
+            var service = fixture.Service;
+            fixture.Products.Clear();
+            fixture.Products.AddRange(
+            [
+                new Product { Name = "Product3", Price = 299.99M },
+                new Product { Name = "Product2", Price = 199.99M },
+                new Product { Name = "Product1", Price = 249.99M },
+            ]);
+
+            var sorted = service.Sort(fixture.Products, SortOrder.Ascending, "Price").ToList();
+
+            Assert.Equal("Product2", sorted[0].Name);
+            Assert.Equal("Product3", sorted[2].Name);
         }
 
         [Fact]
         public void SortProducts_ByPriceDescending()
         {
-            var sortBy = "Price";
-            var sortOrder = SortOrder.Descending;
-            var sort = _service.SortProducts(_products, sortOrder, sortBy).ToList();
-            Assert.Equal("The Last of Us Part II Remastered", sort[0].Name);
-            Assert.Equal("Spider-Man 2", sort[2].Name);
+            var service = fixture.Service;
+            fixture.Products.Clear();
+            fixture.Products.AddRange(
+            [
+                new Product { Name = "Product3", Price = 299.99M },
+                new Product { Name = "Product2", Price = 199.99M },
+                new Product { Name = "Product1", Price = 249.99M },
+            ]);
+
+            var sorted = service.Sort(fixture.Products, SortOrder.Descending, "Price").ToList();
+
+            Assert.Equal("Product3", sorted[0].Name);
+            Assert.Equal("Product2", sorted[2].Name);
         }
 
         [Fact]
         public void SortProducts_ByNameDescending()
         {
-            var sortBy = "Name";
-            var sortOrder = SortOrder.Descending;
-            var sort = _service.SortProducts(_products, sortOrder, sortBy).ToList();
-            Assert.Equal("The Last of Us Part II Remastered", sort[0].Name);
-            Assert.Equal("God of War", sort[2].Name);
+            var service = fixture.Service;
+            fixture.Products.Clear();
+            fixture.Products.AddRange(
+            [
+                new Product { Name = "Product3", Price = 299.99M },
+                new Product { Name = "Product2", Price = 199.99M },
+                new Product { Name = "Product1", Price = 249.99M },
+            ]);
+
+            var sorted = service.Sort(fixture.Products, SortOrder.Descending, "Name").ToList();
+
+            Assert.Equal("Product3", sorted[0].Name);
+            Assert.Equal("Product1", sorted[2].Name);
         }
     }
 }
