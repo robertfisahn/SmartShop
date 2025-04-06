@@ -6,7 +6,7 @@ namespace SmartShopAPI.Interfaces.Services
     public interface IOrderService
     {
         Task<int> PlaceOrder(int userId);
-        Task<Order> GetById(int id);
+        Task<OrderDto> GetById(int orderId, int userId);
         Task<IEnumerable<OrderDto>> GetUserOrders(int userId);
     }
 }

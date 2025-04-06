@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Models.Dtos.Order;
 
 namespace SmartShopAPI.Controllers
 {
-    [Route("/api/order")]
+    [Route("api/order")]
     [ApiController]
     [Authorize]
     public class OrderController(IOrderService orderService, IUserContextService userContextService) : ControllerBase
@@ -28,9 +28,9 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Order>> GetById([FromRoute]int orderId)
+        public async Task<ActionResult<OrderDto>> GetById([FromRoute]int orderId)
         {
-            return Ok(await orderService.GetById(orderId));
+            return Ok(await orderService.GetById(orderId, userContextService.GetUserId()));
         }
 
         [HttpGet]
@@ -38,7 +38,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<Order>>> GetUserOrders()
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetUserOrders()
         {
             return Ok(await orderService.GetUserOrders(userContextService.GetUserId()));
         }

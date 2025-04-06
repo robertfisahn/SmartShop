@@ -14,12 +14,12 @@ namespace SmartShopAPI.Repositories
             .Include(o => o.Address)
             .Where(o => o.UserId == userId)
             .ToListAsync();
-        public async Task<Order?> GetAsync(int orderId) =>
+        public async Task<Order?> GetAsync(int orderId, int userId) =>
             await context.Orders
             .Include(o => o.OrderItems)
             .ThenInclude(oi => oi.Product)
             .Include(o => o.Address)
-            .FirstOrDefaultAsync(o => o.Id == orderId);
+            .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
         public async Task AddAsync(Order order) => await context.Orders.AddAsync(order);
 
         public async Task SaveChangesAsync()

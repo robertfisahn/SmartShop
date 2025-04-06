@@ -10,10 +10,10 @@ namespace SmartShopAPI.Services
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService, 
         IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository) : IOrderService
     {
-        public async Task<Order> GetById(int orderId)
+        public async Task<OrderDto> GetById(int orderId, int userId)
         {
-            var order = await orderRepository.GetAsync(orderId) ?? throw new NotFoundException("Order not found");        
-            return order;
+            var order = await orderRepository.GetAsync(orderId, userId) ?? throw new NotFoundException("Order not found");        
+            return mapper.Map<OrderDto>(order);
         }
 
         public async Task<int> PlaceOrder(int userId)
