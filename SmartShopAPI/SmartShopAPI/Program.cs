@@ -9,6 +9,7 @@ using SmartShopAPI;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
+using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Middleware;
@@ -45,6 +46,7 @@ builder.Services
 builder.Services.AddDbContext<SmartShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SmartShopDbConnection")));
 // Add services to the container.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

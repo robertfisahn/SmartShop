@@ -21,10 +21,5 @@ namespace SmartShopAPI.Repositories
             .Include(o => o.Address)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
         public async Task AddAsync(Order order) => await context.Orders.AddAsync(order);
-
-        public async Task SaveChangesAsync()
-        {
-            await context.SaveChangesAsync();
-        }
     }
 }

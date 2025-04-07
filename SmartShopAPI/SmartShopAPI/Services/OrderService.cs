@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
+using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos.Order;
@@ -8,7 +9,8 @@ using SmartShopAPI.Models.Dtos.Order;
 namespace SmartShopAPI.Services
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService, 
-        IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository) : IOrderService
+        IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository,
+        IUnitOfWork unitOfWork) : IOrderService
     {
         public async Task<OrderDto> GetById(int orderId, int userId)
         {
@@ -19,12 +21,26 @@ namespace SmartShopAPI.Services
         public async Task<int> PlaceOrder(int userId)
         {
             var cartItems = await cartService.GetCart(userId);
-            Order order = await CreateOrder(cartItems, userId);
-            var orderItems = await CreateOrderItems(cartItems, order.Id);
-            await productService.UpdateStock(orderItems);
-            await cartService.ClearCart(userId);
-            await orderRepository.SaveChangesAsync();
-            return order.Id;
+
+            await unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var order = await CreateOrder(cartItems, userId);
+                await unitOfWork.SaveChangesAsync(); // < save for order id
+                var orderItems = await CreateOrderItems(cartItems, order.Id);
+
+                await productService.UpdateStock(orderItems);
+                await cartService.ClearCart(userId);
+                await unitOfWork.SaveChangesAsync();
+
+                await unitOfWork.CommitAsync();
+                return order.Id;
+            }
+            catch
+            {
+                await unitOfWork.RollbackAsync();
+                throw;
+            }
         }
 
         private async Task<Order> CreateOrder(IEnumerable<CartItem> cartItems, int userId)
@@ -37,7 +53,6 @@ namespace SmartShopAPI.Services
                 AddressId = addressId
             };
             await orderRepository.AddAsync(order);
-            await orderRepository.SaveChangesAsync();
             return order;
         }
 
@@ -58,6 +73,4 @@ namespace SmartShopAPI.Services
             return orderItems;
         }
     }
-
-
 }

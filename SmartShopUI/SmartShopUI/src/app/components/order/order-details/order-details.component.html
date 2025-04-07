@@ -19,7 +19,7 @@
       </tr>
       <tr>
         <th>Delivery Address</th>
-        <td>{{ orderDetails.address.street }}, {{ orderDetails.address.city }}, {{ orderDetails.address.postalCode }}</td>
+        <td>{{ orderDetails.street }}, {{ orderDetails.city }}, {{ orderDetails.postalCode }}</td>
       </tr>
     </table>
 
@@ -27,7 +27,7 @@
     <ul class="order-items-list">
       <li *ngFor="let item of orderDetails.orderItems" class="order-item">
         <div class="item-detail">
-          <strong>Product Name:</strong> <span>{{ item.product.name }}</span>
+          <strong>Product Name:</strong> <span>{{ item.productName }}</span>
         </div>
         <div class="item-detail">
           <strong>Quantity:</strong> <span>{{ item.quantity }}</span>
