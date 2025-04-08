@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Moq;
+using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Tests.Helpers.Fixtures;
 
@@ -58,6 +60,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task PlaceOrder_ShouldCreateNewOrder_AndOrderItems()
     {
+        _fixture.ResetData();
         var resultId = await _fixture.Service.PlaceOrder(1);
 
         _fixture.Orders.Should().Contain(o => o.Id == resultId);
@@ -68,9 +71,53 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task PlaceOrder_ShouldSetCorrectTotalPrice()
     {
+        _fixture.ResetData();
         var resultId = await _fixture.Service.PlaceOrder(1);
 
         var createdOrder = _fixture.Orders.First(o => o.Id == resultId);
         createdOrder.TotalPrice.Should().Be(500);
+    }
+
+    [Fact]
+    public async Task PlaceOrder_ShouldCallSaveChangesAsync()
+    {
+        _fixture.ResetData();
+        await _fixture.Service.PlaceOrder(1);
+        
+        _fixture.MockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task PlaceOrder_ShouldCommitTransaction()
+    {
+        _fixture.ResetData();
+        await _fixture.Service.PlaceOrder(1);
+        _fixture.MockUnitOfWork.Verify(uow => uow.BeginTransactionAsync(), Times.Once);
+        _fixture.MockUnitOfWork.Verify(uow => uow.CommitAsync(), Times.Once);
+        _fixture.MockUnitOfWork.Verify(uow => uow.RollbackAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task PlaceOrder_ShouldRollback_WhenExceptionOccurs()
+    {
+        try
+        {
+            _fixture.MockProductService
+                .Setup(p => p.UpdateStock(It.IsAny<List<OrderItem>>()))
+                .ThrowsAsync(new Exception("Simulated failure"));
+
+            await FluentActions
+                .Invoking(() => _fixture.Service.PlaceOrder(1))
+                .Should().ThrowAsync<Exception>()
+                .WithMessage("Simulated failure");
+
+            _fixture.MockUnitOfWork.Verify(u => u.RollbackAsync(), Times.Once);
+        }
+        finally
+        {
+            _fixture.MockProductService
+                .Setup(p => p.UpdateStock(It.IsAny<List<OrderItem>>()))
+                .Returns(Task.CompletedTask);
+        }
     }
 }
