@@ -23,11 +23,20 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --no-restore
 
-      - name: Run tests with detailed output and save results
-        run: dotnet test --no-build --verbosity normal --logger trx
+      - name: Run tests with coverage
+        run: dotnet test --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage"
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4.3.1
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Add dotnet tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Generate HTML coverage report
+        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
+
+      - name: Upload code coverage report
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: '**/TestResults/*.trx'
+          name: coverage-report
+          path: coveragereport
