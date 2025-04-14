@@ -1,5 +1,6 @@
-﻿using Microsoft.Identity.Client;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Microsoft.Identity.Client;
 
 namespace SmartShopAPI.Models.Dtos.User
 {

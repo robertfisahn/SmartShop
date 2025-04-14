@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
@@ -12,7 +13,7 @@ namespace SmartShopAPI.Services
 
         public async Task<IEnumerable<CartItem>> GetCart(int userId) => await cartRepository.GetCartAsync(userId);
 
-        public async Task<CartItem> GetCartItemById(int cartItemId) => 
+        public async Task<CartItem> GetCartItemById(int cartItemId) =>
             await cartRepository.GetCartItemByIdAsync(cartItemId) ?? throw new NotFoundException("Cart item not found");
 
         public async Task<int> AddCartItem(CreateCartItemDto dto, int userId)

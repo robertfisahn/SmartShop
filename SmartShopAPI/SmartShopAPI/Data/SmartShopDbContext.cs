@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Models;
 
@@ -6,7 +7,7 @@ namespace SmartShopAPI.Data
 {
     public class SmartShopDbContext : DbContext
     {
-        public SmartShopDbContext(DbContextOptions options) : base(options) {}
+        public SmartShopDbContext(DbContextOptions options) : base(options) { }
 
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Product> Products { get; set; }
@@ -65,7 +66,7 @@ namespace SmartShopAPI.Data
 
                 entity.Property(p => p.Price)
                 .IsRequired()
-                .HasPrecision(8,2);
+                .HasPrecision(8, 2);
             });
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos.Order;
 
@@ -28,7 +29,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<OrderDto>> GetById([FromRoute]int orderId)
+        public async Task<ActionResult<OrderDto>> GetById([FromRoute] int orderId)
         {
             return Ok(await orderService.GetById(orderId, userContextService.GetUserId()));
         }

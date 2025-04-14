@@ -1,11 +1,14 @@
-﻿using Moq;
-using SmartShopAPI.Models;
-using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Exceptions;
-using SmartShopAPI.Models.Dtos;
-using FluentAssertions;
+﻿using FluentAssertions;
+
 using Microsoft.AspNetCore.Http;
-using SmartShopAPI.Tests.Helpers;
+
+using Moq;
+
+using SmartShopAPI.Exceptions;
+using SmartShopAPI.Models;
+using SmartShopAPI.Models.Dtos;
+using SmartShopAPI.Models.Dtos.Product;
+using SmartShopAPI.Tests.Helpers.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests
 {

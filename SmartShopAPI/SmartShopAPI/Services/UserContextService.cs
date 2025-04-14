@@ -1,6 +1,7 @@
-﻿using SmartShopAPI.Exceptions;
+﻿using System.Security.Claims;
+
+using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Services;
-using System.Security.Claims;
 
 namespace SmartShopAPI.Services
 {
@@ -13,7 +14,7 @@ namespace SmartShopAPI.Services
         public int GetUserId()
         {
             var claim = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            if(claim == null)
+            if (claim == null)
             {
                 throw new NotFoundException("User not found");
             }

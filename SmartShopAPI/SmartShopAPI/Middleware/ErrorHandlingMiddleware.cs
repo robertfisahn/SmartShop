@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
+
+using Newtonsoft.Json;
+
 using SmartShopAPI.Exceptions;
-using System.Net;
 
 namespace SmartShopAPI.Middleware
 {

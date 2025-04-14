@@ -1,10 +1,14 @@
+using System.Text;
+
 using FluentValidation;
 using FluentValidation.AspNetCore;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 using SmartShopAPI;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
@@ -19,7 +23,6 @@ using SmartShopAPI.Models.Dtos.User;
 using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
 using SmartShopAPI.Services;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationSettings = new AuthenticationSettings();

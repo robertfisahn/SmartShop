@@ -30,6 +30,9 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --no-restore
 
+      - name: Check code formatting
+        run: dotnet format --verify-no-changes
+
       - name: Run tests with coverage enabled
         run: dotnet test --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage"
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
@@ -26,7 +27,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> Search([FromQuery]string searchPhrase)
+        public async Task<ActionResult<IEnumerable<ProductDto>>> Search([FromQuery] string searchPhrase)
         {
             return Ok(await productService.Search(searchPhrase));
         }
@@ -34,7 +35,7 @@ namespace SmartShopAPI.Controllers
         [HttpGet("product/check")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> CheckIfNameIsAvailable([FromQuery]string productName)
+        public async Task<ActionResult> CheckIfNameIsAvailable([FromQuery] string productName)
         {
             await productService.EnsureUniqueName(productName, null);
             return Ok(new { message = "Product name is available." });
@@ -45,7 +46,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetByCategory([FromRoute]int categoryId, [FromQuery]QueryParams query)
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetByCategory([FromRoute] int categoryId, [FromQuery] QueryParams query)
         {
             return Ok(await productService.GetByCategory(categoryId, query));
         }
@@ -54,7 +55,7 @@ namespace SmartShopAPI.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ProductDto>> GetById([FromRoute]int productId)
+        public async Task<ActionResult<ProductDto>> GetById([FromRoute] int productId)
         {
             return Ok(await productService.GetById(productId));
         }
@@ -65,7 +66,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Create([FromForm]UpsertProductDto dto, IFormFile? file)
+        public async Task<ActionResult> Create([FromForm] UpsertProductDto dto, IFormFile? file)
         {
             var productId = await productService.Create(dto, file);
             return Created($"api/product/{productId}", null);
@@ -76,7 +77,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Delete([FromRoute]int productId) 
+        public async Task<ActionResult> Delete([FromRoute] int productId)
         {
             await productService.Delete(productId);
             return NoContent();
@@ -88,7 +89,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Update([FromRoute]int productId, [FromForm]UpsertProductDto dto, IFormFile? file)
+        public async Task<ActionResult> Update([FromRoute] int productId, [FromForm] UpsertProductDto dto, IFormFile? file)
         {
             await productService.Update(productId, dto, file);
             return NoContent();

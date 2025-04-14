@@ -1,13 +1,16 @@
 ﻿using AutoMapper;
-using Moq;
-using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
-using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Models;
-using SmartShopAPI.Services;
+
 using Microsoft.AspNetCore.Http;
 
-namespace SmartShopAPI.Tests.Helpers
+using Moq;
+
+using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Models;
+using SmartShopAPI.Models.Dtos.Product;
+using SmartShopAPI.Services;
+
+namespace SmartShopAPI.Tests.Helpers.Fixtures
 {
     public class ProductServiceFixture
     {
