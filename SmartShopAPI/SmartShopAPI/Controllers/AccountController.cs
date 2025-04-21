@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
@@ -20,7 +21,7 @@ namespace SmartShopAPI.Controllers
         [HttpPost("login")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ResponseDto>> Login([FromBody]LoginDto dto)
+        public async Task<ActionResult<ResponseDto>> Login([FromBody] LoginDto dto)
         {
             return Ok(await accountService.GenerateJwt(dto));
         }

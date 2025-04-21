@@ -1,5 +1,6 @@
-﻿using SmartShopAPI.Models;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+
+using SmartShopAPI.Models;
 
 namespace SmartShopAPI.Entities
 {
@@ -8,7 +9,7 @@ namespace SmartShopAPI.Entities
         public int Id { get; set; }
         public int Quantity { get; set; }
         public int ProductId { get; set; }
-        public virtual Product Product {  get; set; }
+        public virtual Product Product { get; set; }
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }
     }

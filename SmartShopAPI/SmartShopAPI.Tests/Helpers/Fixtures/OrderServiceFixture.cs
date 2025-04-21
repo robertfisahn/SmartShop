@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+
 using Moq;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;

@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using SmartShopAPI.Models.Dtos;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+
 using FluentAssertions;
-using SmartShopAPI.Tests.Helpers;
+
+using Microsoft.AspNetCore.Mvc.Testing;
+
+using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
-using System.Net.Http.Headers;
+using SmartShopAPI.Tests.Helpers;
 
 namespace SmartShopAPI.Tests.IntegrationTests
 {
     public class ProductIntegrationTests : IntegrationTestBase
     {
-        public ProductIntegrationTests(WebApplicationFactory<Program> factory) : base(factory){ }
+        public ProductIntegrationTests(WebApplicationFactory<Program> factory) : base(factory) { }
 
         [Fact]
         public async Task GetById_ReturnsOk()
@@ -72,7 +75,7 @@ namespace SmartShopAPI.Tests.IntegrationTests
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
         }
 
-        [Theory] 
+        [Theory]
         [MemberData(nameof(ProductTestData.InvalidCreateProductMultiparts), MemberType = typeof(ProductTestData))]
         public async Task Create_InvalidProductData_ReturnsBadRequest(MultipartFormDataContent createProductMultipart)
         {
@@ -109,7 +112,7 @@ namespace SmartShopAPI.Tests.IntegrationTests
         [InlineData(2, true, System.Net.HttpStatusCode.Forbidden)]
         public async Task Delete_ReturnsForbidden(int productId, bool isUser, System.Net.HttpStatusCode expectedStatusCode)
         {
-            if(isUser)
+            if (isUser)
             {
                 await ConfigureClientForUserAsync();
             }
@@ -118,7 +121,7 @@ namespace SmartShopAPI.Tests.IntegrationTests
         }
 
         [Theory]
-        [InlineData(1, 88)] 
+        [InlineData(1, 88)]
         [InlineData(88, 1)]
         public async Task Delete_ReturnsNotFound(int categoryId, int productId)
         {

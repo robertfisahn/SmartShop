@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+
 using Moq;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Tests.Helpers.Fixtures;
@@ -54,7 +56,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
         var result = await _fixture.Service.GetUserOrders(99);
 
         result.Should().NotBeNull();
-        result.Should().BeEmpty(); 
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -83,7 +85,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     {
         _fixture.ResetData();
         await _fixture.Service.PlaceOrder(1);
-        
+
         _fixture.MockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Exactly(2));
     }
 

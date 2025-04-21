@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Models;
+
 using static System.Net.Mime.MediaTypeNames;
 
 namespace SmartShopAPI.Data

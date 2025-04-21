@@ -9,7 +9,7 @@ namespace SmartShopAPI.Models
         [Required]
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public decimal Price { get; set;}
+        public decimal Price { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime UpdatedDate { get; set; }
         public int StockQuantity { get; set; }

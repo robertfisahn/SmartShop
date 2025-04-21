@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using Moq;
+
 using SmartShopAPI.Data;
 
 namespace SmartShopAPI.Tests.Helpers

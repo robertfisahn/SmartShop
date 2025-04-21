@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.CartItem;
@@ -23,8 +24,8 @@ namespace SmartShopAPI
             CreateMap<ProductDto, Product>();
 
             CreateMap<User, UserDto>()
-                .ForMember(r=>r.RoleName, d=>d.MapFrom(u=>u.Role.Name))
-                .ForMember(r => r.City, d=> d.MapFrom(u=> u.Address.City))
+                .ForMember(r => r.RoleName, d => d.MapFrom(u => u.Role.Name))
+                .ForMember(r => r.City, d => d.MapFrom(u => u.Address.City))
                 .ForMember(r => r.Street, d => d.MapFrom(u => u.Address.Street))
                 .ForMember(r => r.PostalCode, d => d.MapFrom(u => u.Address.PostalCode));
             CreateMap<RegisterUserDto, User>()

@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
-using SmartShopAPI.Models;
-using SmartShopAPI.Exceptions;
-using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Models.Dtos;
-using SmartShopAPI.Interfaces.Services;
+
 using SmartShopAPI.Entities;
+using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Models;
+using SmartShopAPI.Models.Dtos;
+using SmartShopAPI.Models.Dtos.Product;
 
 namespace SmartShopAPI.Services
 {

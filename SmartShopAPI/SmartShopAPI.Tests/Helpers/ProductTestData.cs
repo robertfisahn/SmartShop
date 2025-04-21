@@ -4,8 +4,8 @@ namespace SmartShopAPI.Tests.Helpers
 {
     public class ProductTestData
     {
-        public static QueryParams QueryParams => 
-            new ()
+        public static QueryParams QueryParams =>
+            new()
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -14,7 +14,7 @@ namespace SmartShopAPI.Tests.Helpers
                 SortOrder = SortOrder.Ascending
             };
 
-        public static IEnumerable<object[]> InvalidQueryParamsList => 
+        public static IEnumerable<object[]> InvalidQueryParamsList =>
             new List<object[]>
             {
                 new object[] { new QueryParams
@@ -81,7 +81,7 @@ namespace SmartShopAPI.Tests.Helpers
             };
 
         public static MultipartFormDataContent CreateProductMultipart =>
-            new ()
+            new()
             {
                 { new StringContent("Test Product"), "Name" },
                 { new StringContent("Test Description"), "Description" },

@@ -1,5 +1,6 @@
-﻿using SmartShopAPI.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+
+using SmartShopAPI.Entities;
 
 namespace SmartShopAPI.Models.Dtos.User
 {

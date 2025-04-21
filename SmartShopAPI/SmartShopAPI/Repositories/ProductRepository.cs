@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;

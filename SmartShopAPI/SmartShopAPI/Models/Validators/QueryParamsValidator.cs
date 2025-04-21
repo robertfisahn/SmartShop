@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+
 using SmartShopAPI.Models.Dtos;
 
 namespace SmartShopAPI.Models.Validators
@@ -12,7 +13,7 @@ namespace SmartShopAPI.Models.Validators
             RuleFor(x => x.PageNumber).GreaterThanOrEqualTo(1);
             RuleFor(x => x.PageSize).Custom((value, context) =>
             {
-                if(!allowedPageSizes.Contains(value))
+                if (!allowedPageSizes.Contains(value))
                 {
                     context.AddFailure("PagesSizes", $"Page size must be one of the following values [{string.Join(", ", allowedPageSizes)}]");
                 }

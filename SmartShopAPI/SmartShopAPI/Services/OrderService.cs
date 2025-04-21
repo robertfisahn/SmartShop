@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces;
@@ -8,13 +9,13 @@ using SmartShopAPI.Models.Dtos.Order;
 
 namespace SmartShopAPI.Services
 {
-    public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService, 
+    public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService,
         IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository,
         IUnitOfWork unitOfWork) : IOrderService
     {
         public async Task<OrderDto> GetById(int orderId, int userId)
         {
-            var order = await orderRepository.GetAsync(orderId, userId) ?? throw new NotFoundException("Order not found");        
+            var order = await orderRepository.GetAsync(orderId, userId) ?? throw new NotFoundException("Order not found");
             return mapper.Map<OrderDto>(order);
         }
 

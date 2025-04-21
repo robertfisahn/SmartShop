@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
@@ -19,7 +20,8 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<CartItem>>> GetCart() {
+        public async Task<ActionResult<IEnumerable<CartItem>>> GetCart()
+        {
             return Ok(await cartService.GetCart(userContextService.GetUserId()));
         }
 
@@ -29,7 +31,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> AddCartItem([FromBody]CreateCartItemDto dto)
+        public async Task<ActionResult> AddCartItem([FromBody] CreateCartItemDto dto)
         {
             var cartItemId = await cartService.AddCartItem(dto, userContextService.GetUserId());
             return CreatedAtAction(nameof(GetCart), new { cartItemId }, null);
@@ -40,7 +42,8 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> DeleteCartItem([FromRoute]int cartItemId) {
+        public async Task<ActionResult> DeleteCartItem([FromRoute] int cartItemId)
+        {
 
             var cartItem = await cartService.GetCartItemById(cartItemId);
             var authorizationResult = await authorizationService.AuthorizeAsync(userContextService.User, cartItem,
@@ -49,7 +52,7 @@ namespace SmartShopAPI.Controllers
             {
                 throw new ForbidException("Authorization failed");
             }
-                await cartService.DeleteCartItem(cartItemId);
+            await cartService.DeleteCartItem(cartItemId);
             return NoContent();
         }
 
@@ -59,7 +62,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> UpdateCartItem([FromRoute]int cartItemId, [FromBody]UpdateCartItemDto dto)
+        public async Task<ActionResult> UpdateCartItem([FromRoute] int cartItemId, [FromBody] UpdateCartItemDto dto)
         {
             var cartItem = await cartService.GetCartItemById(cartItemId);
             var authorizationResult = await authorizationService.AuthorizeAsync(userContextService.User, cartItem,

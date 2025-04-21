@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using SmartShopAPI.Data;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
 namespace SmartShopAPI.Tests.IntegrationTests
 {
@@ -39,7 +41,7 @@ namespace SmartShopAPI.Tests.IntegrationTests
 
             var response = await _client.PostAsJsonAsync("api/account/login", loginDto);
             response.EnsureSuccessStatusCode();
-            
+
 
             var dto = await response.Content.ReadFromJsonAsync<ResponseDto>();
             return dto.Token;

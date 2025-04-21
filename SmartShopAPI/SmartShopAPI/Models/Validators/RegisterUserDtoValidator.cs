@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+
 using SmartShopAPI.Models.Dtos.User;
 
 namespace SmartShopAPI.Models.Validators

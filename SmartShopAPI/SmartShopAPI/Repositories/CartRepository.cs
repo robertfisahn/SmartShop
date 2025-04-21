@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
@@ -13,7 +14,7 @@ namespace SmartShopAPI.Repositories
         public async Task<CartItem?> GetCartItemByIdAsync(int cartItemId) =>
             await context.CartItems.Include(p => p.Product).FirstOrDefaultAsync(x => x.Id == cartItemId);
 
-        public async Task<CartItem?> GetCartItemByUserAndProductAsync(int userId, int productId) => 
+        public async Task<CartItem?> GetCartItemByUserAndProductAsync(int userId, int productId) =>
             await context.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
 
         public async Task AddCartItemAsync(CartItem cartItem) =>
