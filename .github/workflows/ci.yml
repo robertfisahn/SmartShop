@@ -34,7 +34,7 @@ jobs:
         run: dotnet format --verify-no-changes
 
       - name: Run tests with coverage enabled
-        run: dotnet test SmartShopAPI/SmartShopAPI.Tests/SmartShopAPI.Tests.csproj --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage"
+        run: dotnet test SmartShopAPI/SmartShopAPI.Tests/SmartShopAPI.Tests.csproj --verbosity normal --logger trx --collect:"XPlat Code Coverage"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
