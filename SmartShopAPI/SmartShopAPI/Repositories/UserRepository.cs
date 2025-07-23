@@ -12,6 +12,8 @@ namespace SmartShopAPI.Repositories
             await context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == email);
         public async Task<int?> GetAddressIdAsync(int userId) =>
             await context.Users.Where(u => u.Id == userId).Select(u => u.AddressId).SingleOrDefaultAsync();
+        public async Task<string?> GetEmailByIdAsync(int userId) =>
+            await context.Users.Where(u => u.Id == userId).Select(u => u.Email).SingleOrDefaultAsync();
         public async Task AddAsync(User user) =>
             await context.Users.AddAsync(user);
         public async Task<bool> EmailExistsAsync(string email)

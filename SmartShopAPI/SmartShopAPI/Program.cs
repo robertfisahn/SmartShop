@@ -14,6 +14,7 @@ using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Middleware;
@@ -25,6 +26,8 @@ using SmartShopAPI.Repositories;
 using SmartShopAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+    .AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 builder.Services.AddSingleton(authenticationSettings);
@@ -51,6 +54,9 @@ builder.Services.AddDbContext<SmartShopDbContext>(options =>
 // Add services to the container.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
+builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
+builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
+builder.Services.AddHostedService<OrderEmailConsumer>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
