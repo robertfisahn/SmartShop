@@ -17,7 +17,7 @@ namespace SmartShopAPI.Services
                 configuration["SendGrid:FromEmail"],
                 configuration["SendGrid:FromName"]
             );
-            var to = new EmailAddress(orderEvent.Email); 
+            var to = new EmailAddress(orderEvent.Email);
 
             var subject = $"Order Confirmation #{orderEvent.OrderId}";
             var plainTextContent = $"Thank you for your order #{orderEvent.OrderId} totaling {orderEvent.TotalPrice} PLN.\nProducts: {string.Join(", ", orderEvent.ProductNames)}";

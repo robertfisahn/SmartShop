@@ -31,6 +31,7 @@ namespace SmartShopAPI.Services
             await channel.BasicPublishAsync(
                 exchange: "",
                 routingKey: _queueName,
-                body: body);}
+                body: body);
+        }
     }
 }
