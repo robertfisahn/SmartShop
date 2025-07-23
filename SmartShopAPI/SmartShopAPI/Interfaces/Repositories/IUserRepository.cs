@@ -6,6 +6,7 @@ namespace SmartShopAPI.Interfaces.Repositories
     {
         Task<User?> GetByEmailAsync(string email);
         Task<int?> GetAddressIdAsync(int userId);
+        Task<string?> GetEmailByIdAsync(int userId);
         Task AddAsync(User user);
         Task<bool> EmailExistsAsync(string email);
         Task SaveChangesAsync();

@@ -13,6 +13,7 @@ using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
+using SmartShopAPI.Repositories;
 
 namespace SmartShopAPI.Services
 {
@@ -77,5 +78,8 @@ namespace SmartShopAPI.Services
         }
 
         public async Task<bool> EmailExistsAsync(string userEmail) => await userRepository.EmailExistsAsync(userEmail);
+
+        public async Task<string?> GetEmailByIdAsync(int userId) =>
+            await userRepository.GetEmailByIdAsync(userId);
     }
 }
