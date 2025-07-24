@@ -9,8 +9,9 @@ using SmartShopAPI.Data;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 
-namespace SmartShopAPI.Tests.IntegrationTests
+namespace SmartShopAPI.Tests.Helpers
 {
+    [Collection("IntegrationTests")]
     public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
         protected readonly WebApplicationFactory<Program> _factory;
