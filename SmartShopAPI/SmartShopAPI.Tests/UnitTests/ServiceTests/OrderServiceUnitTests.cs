@@ -8,19 +8,12 @@ using SmartShopAPI.Tests.Helpers.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests;
 
-public class OrderServiceTests : IClassFixture<OrderServiceFixture>
+public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<OrderServiceFixture>
 {
-    private readonly OrderServiceFixture _fixture;
-
-    public OrderServiceTests(OrderServiceFixture fixture)
-    {
-        _fixture = fixture;
-    }
-
     [Fact]
     public async Task GetById_ShouldReturnOrder_WhenExistsAndBelongsToUser()
     {
-        var result = await _fixture.Service.GetById(1, 1);
+        var result = await fixture.Service.GetById(1, 1);
         result.Should().NotBeNull();
         result.Id.Should().Be(1);
     }
@@ -28,7 +21,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task GetById_ShouldThrowNotFound_WhenOrderDoesNotExist()
     {
-        await FluentActions.Invoking(() => _fixture.Service.GetById(999, 1))
+        await FluentActions.Invoking(() => fixture.Service.GetById(999, 1))
             .Should().ThrowAsync<NotFoundException>()
             .WithMessage("Order not found");
     }
@@ -36,7 +29,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task GetById_ShouldThrowNotFound_WhenOrderBelongsToAnotherUser()
     {
-        await FluentActions.Invoking(() => _fixture.Service.GetById(2, 1))
+        await FluentActions.Invoking(() => fixture.Service.GetById(2, 1))
             .Should().ThrowAsync<NotFoundException>()
             .WithMessage("Order not found");
     }
@@ -44,7 +37,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task GetUserOrders_ShouldReturnOrders_ForValidUser()
     {
-        var result = await _fixture.Service.GetUserOrders(2);
+        var result = await fixture.Service.GetUserOrders(2);
 
         result.Should().NotBeNull();
         result.Should().HaveCount(2);
@@ -53,7 +46,7 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task GetUserOrders_ShouldReturnEmpty_WhenUserHasNoOrders()
     {
-        var result = await _fixture.Service.GetUserOrders(99);
+        var result = await fixture.Service.GetUserOrders(99);
 
         result.Should().NotBeNull();
         result.Should().BeEmpty();
@@ -62,41 +55,41 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     [Fact]
     public async Task PlaceOrder_ShouldCreateNewOrder_AndOrderItems()
     {
-        _fixture.ResetData();
-        var resultId = await _fixture.Service.PlaceOrder(1);
+        fixture.ResetData();
+        var resultId = await fixture.Service.PlaceOrder(1);
 
-        _fixture.Orders.Should().Contain(o => o.Id == resultId);
-        _fixture.OrderItems.Should().Contain(i => i.OrderId == resultId);
+        fixture.Orders.Should().Contain(o => o.Id == resultId);
+        fixture.OrderItems.Should().Contain(i => i.OrderId == resultId);
         resultId.Should().BeGreaterThan(3);
     }
 
     [Fact]
     public async Task PlaceOrder_ShouldSetCorrectTotalPrice()
     {
-        _fixture.ResetData();
-        var resultId = await _fixture.Service.PlaceOrder(1);
+        fixture.ResetData();
+        var resultId = await fixture.Service.PlaceOrder(1);
 
-        var createdOrder = _fixture.Orders.First(o => o.Id == resultId);
+        var createdOrder = fixture.Orders.First(o => o.Id == resultId);
         createdOrder.TotalPrice.Should().Be(500);
     }
 
     [Fact]
     public async Task PlaceOrder_ShouldCallSaveChangesAsync()
     {
-        _fixture.ResetData();
-        await _fixture.Service.PlaceOrder(1);
+        fixture.ResetData();
+        await fixture.Service.PlaceOrder(1);
 
-        _fixture.MockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Exactly(2));
+        fixture.MockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Exactly(2));
     }
 
     [Fact]
     public async Task PlaceOrder_ShouldCommitTransaction()
     {
-        _fixture.ResetData();
-        await _fixture.Service.PlaceOrder(1);
-        _fixture.MockUnitOfWork.Verify(uow => uow.BeginTransactionAsync(), Times.Once);
-        _fixture.MockUnitOfWork.Verify(uow => uow.CommitAsync(), Times.Once);
-        _fixture.MockUnitOfWork.Verify(uow => uow.RollbackAsync(), Times.Never);
+        fixture.ResetData();
+        await fixture.Service.PlaceOrder(1);
+        fixture.MockUnitOfWork.Verify(uow => uow.BeginTransactionAsync(), Times.Once);
+        fixture.MockUnitOfWork.Verify(uow => uow.CommitAsync(), Times.Once);
+        fixture.MockUnitOfWork.Verify(uow => uow.RollbackAsync(), Times.Never);
     }
 
     [Fact]
@@ -104,22 +97,41 @@ public class OrderServiceTests : IClassFixture<OrderServiceFixture>
     {
         try
         {
-            _fixture.MockProductService
+            fixture.MockProductService
                 .Setup(p => p.UpdateStock(It.IsAny<List<OrderItem>>()))
                 .ThrowsAsync(new Exception("Simulated failure"));
 
             await FluentActions
-                .Invoking(() => _fixture.Service.PlaceOrder(1))
+                .Invoking(() => fixture.Service.PlaceOrder(1))
                 .Should().ThrowAsync<Exception>()
                 .WithMessage("Simulated failure");
 
-            _fixture.MockUnitOfWork.Verify(u => u.RollbackAsync(), Times.Once);
+            fixture.MockUnitOfWork.Verify(u => u.RollbackAsync(), Times.Once);
         }
         finally
         {
-            _fixture.MockProductService
+            fixture.MockProductService
                 .Setup(p => p.UpdateStock(It.IsAny<List<OrderItem>>()))
                 .Returns(Task.CompletedTask);
         }
+    }
+
+    [Fact]
+    public async Task PlaceOrder_ShouldPublishOrderPlacedEvent_WithCorrectData()
+    {
+        fixture.ResetData();
+        int userId = 1;
+        var resultId = await fixture.Service.PlaceOrder(userId);
+        var createdOrder = fixture.Orders.First(o => o.Id == resultId);
+
+        fixture.MockEventPublisher.Verify(
+            m => m.PublishOrderPlacedAsync(It.Is<SmartShopAPI.Models.Events.OrderPlacedEvent>(
+                evt =>
+                    evt.OrderId == resultId &&
+                    !string.IsNullOrEmpty(evt.Email) &&
+                    evt.TotalPrice == createdOrder.TotalPrice
+            )),
+            Times.Once
+        );
     }
 }

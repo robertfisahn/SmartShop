@@ -4,6 +4,7 @@ using Moq;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces;
+using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models;
@@ -21,6 +22,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
         public Mock<IProductService> MockProductService { get; }
         public Mock<IAccountService> MockAccountService { get; }
         public Mock<IOrderItemRepository> MockOrderItemRepository { get; }
+        public Mock<IEventPublisher> MockEventPublisher { get; }
         public OrderService Service { get; }
 
         private readonly List<Order> _orders;
@@ -40,6 +42,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
             MockProductService = new Mock<IProductService>();
             MockAccountService = new Mock<IAccountService>();
             MockOrderItemRepository = new Mock<IOrderItemRepository>();
+            MockEventPublisher = new Mock<IEventPublisher>();
 
             _orderItems = BuildOrderItems();
             _orders = BuildOrders();
@@ -56,7 +59,8 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
                 MockProductService.Object,
                 MockAccountService.Object,
                 MockOrderItemRepository.Object,
-                MockUnitOfWork.Object
+                MockUnitOfWork.Object,
+                MockEventPublisher.Object
             );
         }
         private List<Order> BuildOrders()
@@ -158,6 +162,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
             _cartItems.Clear();
             _cartItems.AddRange(BuildCartItems());
             MockUnitOfWork.Invocations.Clear();
+            MockEventPublisher.Invocations.Clear();
         }
 
         private void SetupRepositories()
@@ -189,6 +194,9 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
 
             MockProductService.Setup(p => p.UpdateStock(It.IsAny<List<OrderItem>>()))
                 .Returns(Task.CompletedTask);
+            MockAccountService
+                .Setup(a => a.GetEmailByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync("testuser@example.com");
         }
 
         private void SetupMappers()
