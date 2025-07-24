@@ -1,5 +1,6 @@
-﻿using Xunit;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
+
+using Xunit;
 
 namespace SmartShopAPI.Tests.Helpers
 {
