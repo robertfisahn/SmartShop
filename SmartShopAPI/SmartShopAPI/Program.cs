@@ -56,7 +56,11 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
 builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
 builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
-builder.Services.AddHostedService<OrderEmailConsumer>();
+if (!builder.Environment.IsEnvironment("IntegrationTest") && !builder.Environment.IsEnvironment("Test"))
+{
+    builder.Services.AddHostedService<OrderEmailConsumer>();
+}
+
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

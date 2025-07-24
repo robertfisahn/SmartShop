@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,6 @@ using SmartShopAPI.Models.Dtos.User;
 
 namespace SmartShopAPI.Tests.Helpers
 {
-    [Collection("IntegrationTests")]
     public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
         protected readonly WebApplicationFactory<Program> _factory;
@@ -22,6 +22,7 @@ namespace SmartShopAPI.Tests.Helpers
             _factory = factory
                 .WithWebHostBuilder(builder =>
                 {
+                    builder.UseEnvironment("IntegrationTest");
                     builder.ConfigureServices(services =>
                     {
                         var dbContextOptions = services
