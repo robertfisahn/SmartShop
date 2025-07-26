@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ using SmartShopAPI.Data;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 
-namespace SmartShopAPI.Tests.IntegrationTests
+namespace SmartShopAPI.Tests.Helpers
 {
     public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
@@ -21,6 +22,7 @@ namespace SmartShopAPI.Tests.IntegrationTests
             _factory = factory
                 .WithWebHostBuilder(builder =>
                 {
+                    builder.UseEnvironment("IntegrationTest");
                     builder.ConfigureServices(services =>
                     {
                         var dbContextOptions = services
