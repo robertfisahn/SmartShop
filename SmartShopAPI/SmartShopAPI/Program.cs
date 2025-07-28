@@ -25,12 +25,18 @@ using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
 using SmartShopAPI.Services;
 
+DotNetEnv.Env.Load("../../../.env");
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration
-    .AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
+
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 builder.Services.AddSingleton(authenticationSettings);
+
+var rabbitSettings = new RabbitMqSettings();
+builder.Configuration.GetSection("RabbitMQ").Bind(rabbitSettings);
+builder.Services.AddSingleton(rabbitSettings);
+
 builder.Services
     .AddAuthentication(option =>
     {

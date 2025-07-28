@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime;
+using System.Text;
 using System.Text.Json;
 
 using RabbitMQ.Client;
@@ -9,18 +10,17 @@ using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services
 {
-    public class OrderEmailConsumer(IEmailSender emailSender, ILogger<OrderEmailConsumer> logger) : BackgroundService
+    public class OrderEmailConsumer(IEmailSender emailSender, ILogger<OrderEmailConsumer> logger, RabbitMqSettings _rabbitSettings) : BackgroundService
     {
         private readonly IEmailSender _emailSender = emailSender;
         private readonly ILogger<OrderEmailConsumer> _logger = logger;
         private IConnection? _connection;
         private IChannel? _channel;
-        private const string HostName = "localhost";
         private const string QueueName = "order_placed";
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var factory = new ConnectionFactory() { HostName = HostName };
+            var factory = new ConnectionFactory() { HostName = _rabbitSettings.Host ?? "localhost" };
             _connection = await factory.CreateConnectionAsync(stoppingToken);
             _channel = await _connection.CreateChannelAsync(null, stoppingToken);
 
@@ -67,6 +67,7 @@ namespace SmartShopAPI.Services
             }
             catch (TaskCanceledException)
             {
+                _logger.LogWarning("OrderEmailConsumer cancellation requested.");
             }
         }
 
