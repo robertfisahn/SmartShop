@@ -1,15 +1,27 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
   smartshopapi:
     build:
       context: ./SmartShopAPI/SmartShopAPI
       dockerfile: Dockerfile
     ports:
       - "5888:8080"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__SmartShopDbConnection=Server=sqlserver;Database=SmartShopDB;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+
     depends_on:
       - sqlserver
+      - rabbitmq
 
   smartshopui:
     build:
