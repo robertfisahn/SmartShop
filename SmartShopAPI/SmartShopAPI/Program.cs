@@ -13,6 +13,7 @@ using SmartShopAPI;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
+using SmartShopAPI.Helpers;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Interfaces.Repositories;
@@ -25,7 +26,7 @@ using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
 using SmartShopAPI.Services;
 
-DotNetEnv.Env.Load("../../../.env");
+DotNetEnv.Env.Load("../../.env");
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
@@ -57,9 +58,18 @@ builder.Services
     });
 builder.Services.AddDbContext<SmartShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SmartShopDbConnection")));
+foreach (var kv in builder.Configuration.AsEnumerable())
+{
+    if (kv.Key.Contains("Authentication"))
+        Console.WriteLine($"{kv.Key}: {kv.Value}");
+}
+
+
+
 // Add services to the container.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
+builder.Services.AddSingleton<RabbitMqConnectionHelper, RabbitMqConnectionHelper>();
 builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
 builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
 if (!builder.Environment.IsEnvironment("IntegrationTest") && !builder.Environment.IsEnvironment("Test"))
