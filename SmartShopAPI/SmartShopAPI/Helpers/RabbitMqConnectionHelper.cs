@@ -4,8 +4,12 @@ namespace SmartShopAPI.Helpers
 {
     public class RabbitMqConnectionHelper(RabbitMqSettings _settings, ILogger<RabbitMqConnectionHelper> _logger)
     {
+        private IConnection? _connection;
         public async Task<IConnection> CreateConnectionWithRetryAsync(int maxRetries = 3, int delaySeconds = 5)
         {
+            if (_connection is { IsOpen: true })
+                return _connection;
+
             var factory = new ConnectionFactory
             {
                 HostName = _settings.Host ?? "localhost",
@@ -19,9 +23,9 @@ namespace SmartShopAPI.Helpers
                 try
                 {
                     _logger.LogInformation("Attempt {i}/{maxRetries} to connect to RabbitMQ...", i, maxRetries);
-                    var connection = await factory.CreateConnectionAsync();
+                    _connection = await factory.CreateConnectionAsync();
                     _logger.LogInformation("RabbitMQ connection established.");
-                    return connection;
+                    return _connection;
                 }
                 catch (Exception ex)
                 {
