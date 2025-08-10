@@ -3,27 +3,20 @@ using System.Text.Json;
 
 using RabbitMQ.Client;
 
+using SmartShopAPI.Helpers;
 using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services
 {
-    public class RabbitMqPublisher(RabbitMqSettings _settings) : IEventPublisher
+    public class RabbitMqPublisher(RabbitMqConnectionHelper _rabbitConnectionHelper) : IEventPublisher
     {
         private readonly string _queueName = "order_placed";
 
         public async Task PublishOrderPlacedAsync(OrderPlacedEvent orderEvent)
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = _settings.Host ?? "localhost",
-                Port = _settings.Port > 0 ? _settings.Port : 5672,
-                UserName = _settings.UserName ?? "guest",
-                Password = _settings.Password ?? "guest"
-            };
-
-            using var connection = await factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
+            var connection = await _rabbitConnectionHelper.CreateConnectionWithRetryAsync();
+            await using var channel = await connection.CreateChannelAsync();
 
             await channel.QueueDeclareAsync(
                 queue: _queueName,
