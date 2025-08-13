@@ -10,7 +10,11 @@ using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services
 {
-    public class OrderEmailConsumer(IEmailSender _emailSender, ILogger<OrderEmailConsumer> _logger, RabbitMqConnectionHelper _rabbitConnectionHelper) : BackgroundService
+    public class OrderEmailConsumer(
+        IEmailSender _emailSender,
+        ILogger<OrderEmailConsumer> _logger,
+        RabbitMqConnectionHelper _rabbitConnectionHelper
+    ) : BackgroundService
     {
         private IConnection? _connection;
         private IChannel? _channel;
@@ -21,9 +25,11 @@ namespace SmartShopAPI.Services
             _connection = await _rabbitConnectionHelper.CreateConnectionWithRetryAsync();
             _channel = await _connection.CreateChannelAsync(null, stoppingToken);
 
+            await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 5, global: false, cancellationToken: stoppingToken);
+
             await _channel.QueueDeclareAsync(
                 queue: QueueName,
-                durable: false,
+                durable: true,
                 exclusive: false,
                 autoDelete: false,
                 cancellationToken: stoppingToken);
@@ -41,18 +47,23 @@ namespace SmartShopAPI.Services
                     if (orderEvent != null)
                     {
                         await _emailSender.SendOrderConfirmationAsync(orderEvent);
+                        await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+                    }
+                    else
+                    {
+                        await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "[OrderEmailConsumer] Error occurred");
+                    await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true); // TODO: zamienić na retry/DLQ
                 }
             };
 
-
             await _channel.BasicConsumeAsync(
                 queue: QueueName,
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
