@@ -26,9 +26,26 @@ namespace SmartShopAPI.Services
             _channel = await _connection.CreateChannelAsync(null, stoppingToken);
 
             await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 5, global: false, cancellationToken: stoppingToken);
+            _logger.LogInformation("QoS set: prefetchCount={Prefetch}", 5);
 
+            var mainQueueArgs = new Dictionary<string, object>
+            {
+                { "x-dead-letter-exchange", "" },
+                { "x-dead-letter-routing-key", QueueName + "-dlq" }
+            };
+
+            _logger.LogInformation("Declaring main queue '{Queue}' with DLX→'{Dlq}'", QueueName, QueueName + "-dlq");
             await _channel.QueueDeclareAsync(
                 queue: QueueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: mainQueueArgs,
+                cancellationToken: stoppingToken);
+
+            _logger.LogInformation("Declaring DLQ '{QueueDlq}'", QueueName + "-dlq");
+            await _channel.QueueDeclareAsync(
+                queue: QueueName + "-dlq",
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
@@ -36,28 +53,35 @@ namespace SmartShopAPI.Services
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
 
-            consumer.ReceivedAsync += async (model, ea) =>
+            consumer.ReceivedAsync += async (_, ea) =>
             {
+                var deliveryTag = ea.DeliveryTag;
                 try
                 {
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
+                    _logger.LogDebug("Message received: tag={Tag}, size={Size}B", deliveryTag, body.Length);
+
                     var orderEvent = JsonSerializer.Deserialize<OrderPlacedEvent>(message);
 
                     if (orderEvent != null)
                     {
+                        _logger.LogInformation("Processing order event: tag={Tag}, orderId={OrderId}", deliveryTag, orderEvent.OrderId);
                         await _emailSender.SendOrderConfirmationAsync(orderEvent);
-                        await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+                        await _channel.BasicAckAsync(deliveryTag, multiple: false);
+                        _logger.LogInformation("ACK sent: tag={Tag}", deliveryTag);
                     }
                     else
                     {
-                        await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                        _logger.LogWarning("Invalid payload (null after deserialize). Sending to DLQ. tag={Tag}", deliveryTag);
+                        await _channel.BasicNackAsync(deliveryTag, multiple: false, requeue: false);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[OrderEmailConsumer] Error occurred");
-                    await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true); // TODO: zamienić na retry/DLQ
+                    _logger.LogError(ex, "[OrderEmailConsumer] Error occurred while processing. tag={Tag}", deliveryTag);
+                    await _channel.BasicNackAsync(deliveryTag, multiple: false, requeue: false);
+                    _logger.LogWarning("NACK (requeue:false) sent: tag={Tag} → DLQ", deliveryTag);
                 }
             };
 
@@ -67,7 +91,7 @@ namespace SmartShopAPI.Services
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
-            _logger.LogInformation("OrderEmailConsumer started listening...");
+            _logger.LogInformation("OrderEmailConsumer started listening on '{Queue}'...", QueueName);
 
             try
             {
@@ -75,6 +99,7 @@ namespace SmartShopAPI.Services
             }
             catch (TaskCanceledException)
             {
+                _logger.LogInformation("OrderEmailConsumer stopping (cancellation requested).");
             }
         }
 

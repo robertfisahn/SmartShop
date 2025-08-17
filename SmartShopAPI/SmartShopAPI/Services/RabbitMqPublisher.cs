@@ -2,6 +2,7 @@
 using System.Text.Json;
 
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 using SmartShopAPI.Helpers;
 using SmartShopAPI.Interfaces.Events;
@@ -9,47 +10,59 @@ using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services
 {
-    public class RabbitMqPublisher(RabbitMqConnectionHelper _rabbitConnectionHelper) : IEventPublisher
+    public class RabbitMqPublisher(
+        RabbitMqConnectionHelper _rabbitConnectionHelper,
+        ILogger<RabbitMqPublisher> _logger
+    ) : IEventPublisher
     {
-        private readonly string _queueName = "order_placed";
+        private const string QueueName = "order_placed";
 
         public async Task PublishOrderPlacedAsync(OrderPlacedEvent orderEvent)
         {
-            var connection = await _rabbitConnectionHelper.CreateConnectionWithRetryAsync();
+            var conn = await _rabbitConnectionHelper.CreateConnectionWithRetryAsync();
+            await using var ch = await conn.CreateChannelAsync(new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true));
 
-            await using var channel = await connection.CreateChannelAsync(
-                new CreateChannelOptions(
-                    publisherConfirmationsEnabled: true,
-                    publisherConfirmationTrackingEnabled: true
-                )
-            );
-
-            channel.BasicReturnAsync += (_, args) =>
+            ch.BasicReturnAsync += (_, a) =>
             {
-                var returnedMsg = Encoding.UTF8.GetString(args.Body.ToArray());
-                Console.WriteLine($"[RETURN] rk={args.RoutingKey} reply={args.ReplyText} msg={returnedMsg}");
+                _logger.LogWarning("BASIC.RETURN code={Code} rk={RK} reply='{Reply}'", a.ReplyCode, a.RoutingKey, a.ReplyText);
                 return Task.CompletedTask;
             };
 
-            await channel.QueueDeclareAsync(
-                queue: _queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false);
+            for (var i = 1; i <= 5; i++)
+            {
+                try
+                {
+                    await ch.QueueDeclarePassiveAsync(QueueName);
+                    if (i > 1) _logger.LogInformation("Queue '{Queue}' became available after {Attempt} attempts.", QueueName, i);
+                    break;
+                }
+                catch (OperationInterruptedException ex) when (ex.ShutdownReason?.ReplyCode == 404)
+                {
+                    if (i == 5)
+                    {
+                        _logger.LogError(ex, "Queue '{Queue}' not found after {Attempts} attempts.", QueueName, i);
+                        throw new InvalidOperationException($"Queue '{QueueName}' not found.", ex);
+                    }
+
+                    var delay = 200 * i;
+                    _logger.LogInformation("Queue '{Queue}' not found (attempt {Attempt}/5). Retrying in {Delay}ms...", QueueName, i, delay);
+                    await Task.Delay(delay);
+                }
+            }
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(orderEvent));
             var props = new BasicProperties { DeliveryMode = DeliveryModes.Persistent };
 
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await channel.BasicPublishAsync(
+            _logger.LogInformation("Publishing OrderPlaced event to '{Queue}'...", QueueName);
+            await ch.BasicPublishAsync(
                 exchange: "",
-                routingKey: _queueName,
+                routingKey: QueueName,
                 mandatory: true,
                 basicProperties: props,
-                body: body,
-                cancellationToken: cts.Token
-            );
+                body: body);
+            _logger.LogInformation("Publish completed to '{Queue}'.", QueueName);
         }
-
     }
 }
