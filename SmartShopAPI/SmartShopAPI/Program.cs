@@ -3,6 +3,8 @@ using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
+using MassTransit;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +15,6 @@ using SmartShopAPI;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
-using SmartShopAPI.Helpers;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Interfaces.Repositories;
@@ -38,6 +39,41 @@ var rabbitSettings = new RabbitMqSettings();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitSettings);
 builder.Services.AddSingleton(rabbitSettings);
 
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumers(typeof(Program).Assembly);
+
+    if (builder.Environment.IsEnvironment("IntegrationTest"))
+    {
+        x.UsingInMemory((context, cfg) =>
+        {
+            cfg.ConfigureEndpoints(context);
+        });
+    }
+    else
+    {
+        x.AddEntityFrameworkOutbox<SmartShopDbContext>(o =>
+        {
+            o.QueryDelay = TimeSpan.FromSeconds(1);
+            o.UseSqlServer();
+            o.UseBusOutbox();
+            o.DisableInboxCleanupService();
+        });
+
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host(rabbitSettings.Host, (ushort)rabbitSettings.Port, "/", h =>
+            {
+                h.Username(rabbitSettings.UserName);
+                h.Password(rabbitSettings.Password);
+            });
+
+            cfg.ConfigureEndpoints(context);
+        });
+    }
+});
+
+
 builder.Services
     .AddAuthentication(option =>
     {
@@ -60,13 +96,7 @@ builder.Services.AddDbContext<SmartShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SmartShopDbConnection")));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
-builder.Services.AddSingleton<RabbitMqConnectionHelper, RabbitMqConnectionHelper>();
-builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
 builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
-if (!builder.Environment.IsEnvironment("IntegrationTest") && !builder.Environment.IsEnvironment("Test"))
-{
-    builder.Services.AddHostedService<OrderEmailConsumer>();
-}
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

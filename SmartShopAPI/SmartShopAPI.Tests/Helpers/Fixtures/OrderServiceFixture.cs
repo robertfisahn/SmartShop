@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 
+using MassTransit;
+
 using Moq;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces;
-using SmartShopAPI.Interfaces.Events;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models;
@@ -22,7 +23,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
         public Mock<IProductService> MockProductService { get; }
         public Mock<IAccountService> MockAccountService { get; }
         public Mock<IOrderItemRepository> MockOrderItemRepository { get; }
-        public Mock<IEventPublisher> MockEventPublisher { get; }
+        public Mock<IPublishEndpoint> MockPublishEndpoint { get; }
         public OrderService Service { get; }
 
         private readonly List<Order> _orders;
@@ -42,7 +43,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
             MockProductService = new Mock<IProductService>();
             MockAccountService = new Mock<IAccountService>();
             MockOrderItemRepository = new Mock<IOrderItemRepository>();
-            MockEventPublisher = new Mock<IEventPublisher>();
+            MockPublishEndpoint = new Mock<IPublishEndpoint>();
 
             _orderItems = BuildOrderItems();
             _orders = BuildOrders();
@@ -60,7 +61,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
                 MockAccountService.Object,
                 MockOrderItemRepository.Object,
                 MockUnitOfWork.Object,
-                MockEventPublisher.Object
+                MockPublishEndpoint.Object
             );
         }
         private List<Order> BuildOrders()
@@ -162,7 +163,7 @@ namespace SmartShopAPI.Tests.Helpers.Fixtures
             _cartItems.Clear();
             _cartItems.AddRange(BuildCartItems());
             MockUnitOfWork.Invocations.Clear();
-            MockEventPublisher.Invocations.Clear();
+            MockPublishEndpoint.Invocations.Clear();
         }
 
         private void SetupRepositories()

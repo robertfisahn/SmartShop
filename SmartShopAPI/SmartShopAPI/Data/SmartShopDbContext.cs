@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+
+using Microsoft.EntityFrameworkCore;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Models;
@@ -68,6 +70,9 @@ namespace SmartShopAPI.Data
                 .IsRequired()
                 .HasPrecision(8, 2);
             });
+
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
         }
     }
 }

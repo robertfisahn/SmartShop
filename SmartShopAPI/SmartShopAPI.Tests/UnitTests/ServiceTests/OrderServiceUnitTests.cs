@@ -124,13 +124,13 @@ public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<Orde
         var resultId = await fixture.Service.PlaceOrder(userId);
         var createdOrder = fixture.Orders.First(o => o.Id == resultId);
 
-        fixture.MockEventPublisher.Verify(
-            m => m.PublishOrderPlacedAsync(It.Is<SmartShopAPI.Models.Events.OrderPlacedEvent>(
+        fixture.MockPublishEndpoint.Verify(
+            m => m.Publish(It.Is<SmartShopAPI.Models.Events.OrderPlacedEvent>(
                 evt =>
                     evt.OrderId == resultId &&
                     !string.IsNullOrEmpty(evt.Email) &&
                     evt.TotalPrice == createdOrder.TotalPrice
-            )),
+            ), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
