@@ -43,24 +43,34 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumers(typeof(Program).Assembly);
 
-    x.AddEntityFrameworkOutbox<SmartShopDbContext>(o =>
+    if (builder.Environment.IsEnvironment("IntegrationTest"))
     {
-        o.QueryDelay = TimeSpan.FromSeconds(1);
-        o.UseSqlServer();
-        o.UseBusOutbox();
-        o.DisableInboxCleanupService();
-    });
-
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(rabbitSettings.Host, (ushort)rabbitSettings.Port, "/", h =>
+        x.UsingInMemory((context, cfg) =>
         {
-            h.Username(rabbitSettings.UserName);
-            h.Password(rabbitSettings.Password);
+            cfg.ConfigureEndpoints(context);
+        });
+    }
+    else
+    {
+        x.AddEntityFrameworkOutbox<SmartShopDbContext>(o =>
+        {
+            o.QueryDelay = TimeSpan.FromSeconds(1);
+            o.UseSqlServer();
+            o.UseBusOutbox();
+            o.DisableInboxCleanupService();
         });
 
-        cfg.ConfigureEndpoints(context);
-    });
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host(rabbitSettings.Host, (ushort)rabbitSettings.Port, "/", h =>
+            {
+                h.Username(rabbitSettings.UserName);
+                h.Password(rabbitSettings.Password);
+            });
+
+            cfg.ConfigureEndpoints(context);
+        });
+    }
 });
 
 
@@ -87,10 +97,6 @@ builder.Services.AddDbContext<SmartShopDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
 builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
-//if (!builder.Environment.IsEnvironment("IntegrationTest") && !builder.Environment.IsEnvironment("Test"))
-//{
-//    builder.Services.AddHostedService<OrderEmailConsumer>();
-//}
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
