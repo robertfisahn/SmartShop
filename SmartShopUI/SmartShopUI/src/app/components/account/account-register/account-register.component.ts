@@ -5,9 +5,10 @@ import { Router } from '@angular/router';
 import { AccountService } from '../../../services/account/account.service';
 
 @Component({
-  selector: 'app-account-register',
-  templateUrl: './account-register.component.html',
-  styleUrls: ['./account-register.component.css']
+    selector: 'app-account-register',
+    templateUrl: './account-register.component.html',
+    styleUrls: ['./account-register.component.css'],
+    standalone: false
 })
 export class AccountRegisterComponent {
 

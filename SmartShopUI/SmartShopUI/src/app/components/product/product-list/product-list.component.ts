@@ -7,9 +7,10 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-product',
-  templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+    selector: 'app-product',
+    templateUrl: './product-list.component.html',
+    styleUrls: ['./product-list.component.css'],
+    standalone: false
 })
 export class ProductListComponent implements OnInit {
   products: ProductDto[] = [];

@@ -8,6 +8,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -92,8 +93,12 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
         };
     });
-builder.Services.AddDbContext<SmartShopDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SmartShopDbConnection")));
+if (!builder.Environment.IsEnvironment("IntegrationTest"))
+{
+    builder.Services.AddDbContext<SmartShopDbContext>(opt =>
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("SmartShopDbConnection")));
+}
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
 builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
@@ -156,7 +161,8 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-builder.Services.AddAutoMapper(typeof(SmartShopMappingProfile));
+builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSmartShopUI",

@@ -6,9 +6,10 @@ import { CreateProductDto } from '../../../models/createProduct.dto';
 import { ProductDto } from '../../../models/product.dto';
 
 @Component({
-  selector: 'app-product-update',
-  templateUrl: './product-update.component.html',
-  styleUrls: ['./product-update.component.css']
+    selector: 'app-product-update',
+    templateUrl: './product-update.component.html',
+    styleUrls: ['./product-update.component.css'],
+    standalone: false
 })
 export class ProductUpdateComponent implements OnInit {
   productId!: number;

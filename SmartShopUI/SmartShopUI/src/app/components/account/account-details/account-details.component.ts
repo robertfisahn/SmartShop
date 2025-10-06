@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-account-details',
-  templateUrl: './account-details.component.html',
-  styleUrls: ['./account-details.component.css']
+    selector: 'app-account-details',
+    templateUrl: './account-details.component.html',
+    styleUrls: ['./account-details.component.css'],
+    standalone: false
 })
 export class AccountDetailsComponent {
 

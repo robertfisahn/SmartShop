@@ -4,9 +4,10 @@ import { ProductService } from '../../../services/product/product.service';
 import { ProductDto } from '../../../models/product.dto';
 
 @Component({
-  selector: 'app-product-delete',
-  templateUrl: './product-delete.component.html',
-  styleUrls: ['./product-delete.component.css']
+    selector: 'app-product-delete',
+    templateUrl: './product-delete.component.html',
+    styleUrls: ['./product-delete.component.css'],
+    standalone: false
 })
 export class ProductDeleteComponent implements OnInit {
   productId!: number;
