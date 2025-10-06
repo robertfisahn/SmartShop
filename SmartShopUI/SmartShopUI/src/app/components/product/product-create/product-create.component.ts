@@ -6,9 +6,10 @@ import { CategoryService } from '../../../services/category/category.service';
 import { of, map, catchError, Observable, tap } from 'rxjs';
 
 @Component({
-  selector: 'app-product-create',
-  templateUrl: './product-create.component.html',
-  styleUrls: ['./product-create.component.css']
+    selector: 'app-product-create',
+    templateUrl: './product-create.component.html',
+    styleUrls: ['./product-create.component.css'],
+    standalone: false
 })
 export class ProductCreateComponent implements OnInit {
   productForm!: FormGroup;

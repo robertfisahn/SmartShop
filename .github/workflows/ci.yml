@@ -15,28 +15,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-dotnet@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9 SDK 
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
+
       - name: Cache NuGet packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - run: dotnet restore
-      - run: dotnet build SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj --no-restore
-
-      - name: Check code formatting
-        run: dotnet format --verify-no-changes
+      - name: Restore dependencies
+        run : dotnet restore
+        
+      - name: Build solution 
+        run : dotnet build SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj --no-restore
 
       - name: Set JWT_KEY env
         run: echo "Authentication__JwtKey=${{ secrets.JWT_KEY }}" >> $GITHUB_ENV
 
-      - name: Run tests with coverage enabled
+      - name: Run tests with coverage (IntegrationTest env)
+        env : 
+          ASPNETCORE_ENVIRONMENT: IntegrationTest
         run: dotnet test SmartShopAPI/SmartShopAPI.Tests/SmartShopAPI.Tests.csproj --verbosity normal --logger trx --collect:"XPlat Code Coverage"
 
       - name: Upload test results

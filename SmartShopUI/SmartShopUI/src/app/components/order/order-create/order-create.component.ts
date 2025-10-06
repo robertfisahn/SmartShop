@@ -4,9 +4,10 @@ import { OrderService } from '../../../services/order/order.service';
 import { Order } from '../../../models/order.dto';
 
 @Component({
-  selector: 'app-order-create',
-  templateUrl: './order-create.component.html',
-  styleUrls: ['./order-create.component.css']
+    selector: 'app-order-create',
+    templateUrl: './order-create.component.html',
+    styleUrls: ['./order-create.component.css'],
+    standalone: false
 })
 export class OrderCreateComponent implements OnInit {
   order: Order | undefined;

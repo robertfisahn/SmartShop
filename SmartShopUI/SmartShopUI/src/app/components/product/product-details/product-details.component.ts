@@ -5,9 +5,10 @@ import { ProductDto } from '../../../models/product.dto';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-product-details',
-  templateUrl: './product-details.component.html',
-  styleUrls: ['./product-details.component.css']
+    selector: 'app-product-details',
+    templateUrl: './product-details.component.html',
+    styleUrls: ['./product-details.component.css'],
+    standalone: false
 })
 export class ProductDetailsComponent implements OnInit {
   product: ProductDto | null = null;

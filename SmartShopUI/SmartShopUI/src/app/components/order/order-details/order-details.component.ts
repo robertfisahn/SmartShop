@@ -3,9 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../../services/order/order.service';
 
 @Component({
-  selector: 'app-order-details',
-  templateUrl: './order-details.component.html',
-  styleUrls: ['./order-details.component.css']
+    selector: 'app-order-details',
+    templateUrl: './order-details.component.html',
+    styleUrls: ['./order-details.component.css'],
+    standalone: false
 })
 export class OrderDetailsComponent implements OnInit {
   orderId: number = 0;
