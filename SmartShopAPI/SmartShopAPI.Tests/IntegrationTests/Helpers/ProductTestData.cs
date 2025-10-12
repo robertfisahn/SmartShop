@@ -1,6 +1,6 @@
 ﻿using SmartShopAPI.Models.Dtos;
 
-namespace SmartShopAPI.Tests.Helpers
+namespace SmartShopAPI.Tests.IntegrationTests.Helpers
 {
     public class ProductTestData
     {

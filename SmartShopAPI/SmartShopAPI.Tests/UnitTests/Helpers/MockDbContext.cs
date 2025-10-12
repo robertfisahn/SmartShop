@@ -4,7 +4,7 @@ using Moq;
 
 using SmartShopAPI.Data;
 
-namespace SmartShopAPI.Tests.Helpers
+namespace SmartShopAPI.Tests.UnitTests.Helpers
 {
     public static class MockDbContext
     {

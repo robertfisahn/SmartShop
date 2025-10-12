@@ -6,7 +6,7 @@ using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Services;
 
-namespace SmartShopAPI.Tests.Helpers.Fixtures
+namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {
     public class CartServiceFixture
     {
