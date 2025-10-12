@@ -12,7 +12,7 @@ using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Services;
 
-namespace SmartShopAPI.Tests.Helpers.Fixtures
+namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {
     public class OrderServiceFixture
     {

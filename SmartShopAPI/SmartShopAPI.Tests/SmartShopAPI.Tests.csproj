@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Helpers\test.jpg" />
+    <None Remove="IntegrationTests\Helpers\test.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Helpers\test.jpg">
+    <Content Include="IntegrationTests\Helpers\test.jpg">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -8,7 +8,7 @@ using SmartShopAPI.Exceptions;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Tests.Helpers.Fixtures;
+using SmartShopAPI.Tests.UnitTests.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests
 {

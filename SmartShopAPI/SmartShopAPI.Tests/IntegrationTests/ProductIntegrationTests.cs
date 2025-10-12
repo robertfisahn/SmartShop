@@ -1,20 +1,15 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
-
-using FluentAssertions;
+﻿using FluentAssertions;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 
 using SmartShopAPI.Models.Dtos;
-using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Tests.Helpers;
+using SmartShopAPI.Tests.IntegrationTests.Data;
+using SmartShopAPI.Tests.IntegrationTests.Helpers;
 
 namespace SmartShopAPI.Tests.IntegrationTests
 {
-    public class ProductIntegrationTests : IntegrationTestBase
+    public class ProductIntegrationTests(WebApplicationFactory<Program> factory) : IntegrationTestBase(factory)
     {
-        public ProductIntegrationTests(WebApplicationFactory<Program> factory) : base(factory) { }
-
         [Fact]
         public async Task GetById_ReturnsOk()
         {

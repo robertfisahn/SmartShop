@@ -4,7 +4,7 @@ using Moq;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Tests.Helpers.Fixtures;
+using SmartShopAPI.Tests.UnitTests.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests;
 

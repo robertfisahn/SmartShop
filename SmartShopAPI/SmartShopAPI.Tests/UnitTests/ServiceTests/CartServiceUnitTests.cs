@@ -2,7 +2,7 @@
 
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Models.Dtos.CartItem;
-using SmartShopAPI.Tests.Helpers.Fixtures;
+using SmartShopAPI.Tests.UnitTests.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests
 {
