@@ -31,6 +31,7 @@ using SmartShopAPI.Services;
 DotNetEnv.Env.Load("../../.env");
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
+builder.Services.AddHealthChecks();
 
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
@@ -39,41 +40,41 @@ builder.Services.AddSingleton(authenticationSettings);
 var rabbitSettings = new RabbitMqSettings();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitSettings);
 builder.Services.AddSingleton(rabbitSettings);
-
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumers(typeof(Program).Assembly);
-
-    if (builder.Environment.IsEnvironment("IntegrationTest"))
+if (rabbitSettings.Host != "disabled") {
+    builder.Services.AddMassTransit(x =>
     {
-        x.UsingInMemory((context, cfg) =>
+        x.AddConsumers(typeof(Program).Assembly);
+    
+        if (builder.Environment.IsEnvironment("IntegrationTest"))
         {
-            cfg.ConfigureEndpoints(context);
-        });
-    }
-    else
-    {
-        x.AddEntityFrameworkOutbox<SmartShopDbContext>(o =>
-        {
-            o.QueryDelay = TimeSpan.FromSeconds(1);
-            o.UseSqlServer();
-            o.UseBusOutbox();
-            o.DisableInboxCleanupService();
-        });
-
-        x.UsingRabbitMq((context, cfg) =>
-        {
-            cfg.Host(rabbitSettings.Host, (ushort)rabbitSettings.Port, "/", h =>
+            x.UsingInMemory((context, cfg) =>
             {
-                h.Username(rabbitSettings.UserName);
-                h.Password(rabbitSettings.Password);
+                cfg.ConfigureEndpoints(context);
             });
-
-            cfg.ConfigureEndpoints(context);
-        });
-    }
-});
-
+        }
+        else
+        {
+            x.AddEntityFrameworkOutbox<SmartShopDbContext>(o =>
+            {
+                o.QueryDelay = TimeSpan.FromSeconds(1);
+                o.UseSqlServer();
+                o.UseBusOutbox();
+                o.DisableInboxCleanupService();
+            });
+    
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(rabbitSettings.Host, (ushort)rabbitSettings.Port, "/", h =>
+                {
+                    h.Username(rabbitSettings.UserName);
+                    h.Password(rabbitSettings.Password);
+                });
+    
+                cfg.ConfigureEndpoints(context);
+            });
+        }
+    });
+}
 
 builder.Services
     .AddAuthentication(option =>
@@ -191,6 +192,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.UseStaticFiles();
 app.Run();
 
