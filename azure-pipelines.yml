@@ -55,15 +55,20 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az acr login --name smartshop
-  displayName: 'Login to ACR'
+      Write-Host "Logging into Azure Container Registry..."
+      $acrName = "smartshop"
+      $acrUser = az acr credential show --name $acrName --query "username" -o tsv
+      $acrPass = az acr credential show --name $acrName --query "passwords[0].value" -o tsv
+      docker login $acrName.azurecr.io -u $acrUser -p $acrPass
+  displayName: 'Login to ACR (direct Docker login)'
 
 - script: |
-    docker build -t $(acrName)/$(apiImageName):$(tag) ./SmartShopAPI/SmartShopAPI
-    docker build -t $(acrName)/$(uiImageName):$(tag) ./SmartShopUI/SmartShopUI
+    docker build -t smartshop.azurecr.io/smartshopapi:$(Build.BuildId) ./SmartShopAPI/SmartShopAPI
+    docker build -t smartshop.azurecr.io/smartshopui:$(Build.BuildId) ./SmartShopUI/SmartShopUI
   displayName: 'Build Docker images'
 
 - script: |
-    docker push $(acrName)/$(apiImageName):$(tag)
-    docker push $(acrName)/$(uiImageName):$(tag)
+    docker push smartshop.azurecr.io/smartshopapi:$(Build.BuildId)
+    docker push smartshop.azurecr.io/smartshopui:$(Build.BuildId)
   displayName: 'Push Docker images to ACR'
+
