@@ -52,7 +52,7 @@ steps:
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'AzureConnection'
-    scriptType: 'bash'
+    scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
       az acr login --name smartshop
