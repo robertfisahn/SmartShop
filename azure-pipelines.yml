@@ -55,11 +55,12 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      Write-Host "Logging into Azure Container Registry..."
+      Write-Host "Fetching ACR credentials and logging in..."
       $acrName = "smartshop"
+      $acrServer = "$acrName.azurecr.io"
       $acrUser = az acr credential show --name $acrName --query "username" -o tsv
       $acrPass = az acr credential show --name $acrName --query "passwords[0].value" -o tsv
-      docker login $acrName.azurecr.io -u $acrUser -p $acrPass
+      docker login $acrServer -u $acrUser -p $acrPass
   displayName: 'Login to ACR (direct Docker login)'
 
 - script: |
