@@ -1,5 +1,8 @@
 trigger:
-  - master
+  branches:
+    include:
+      - master
+      - feature/azure-pipelines
 
 pool:
   vmImage: ubuntu-latest
