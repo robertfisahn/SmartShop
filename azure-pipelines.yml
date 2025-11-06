@@ -5,7 +5,7 @@ trigger:
       - feature/azure-pipelines
 
 pool:
-  vmImage: ubuntu-latest
+  name: Default
 
 variables:
   - group: SmartShop-Env
