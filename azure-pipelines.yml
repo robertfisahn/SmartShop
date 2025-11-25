@@ -2,7 +2,6 @@ trigger:
   branches:
     include:
       - master
-      - feature/azure-pipelines
 
 pool:
   name: Default
@@ -11,8 +10,8 @@ variables:
   - group: SmartShop-Env
   - name: buildConfiguration
     value: 'Release'
-  - name: acrName
-    value: 'smartshop.azurecr.io'
+  - name: acrServer
+    value: 'acrsmartshop.azurecr.io'
   - name: apiImageName
     value: 'smartshopapi'
   - name: uiImageName
@@ -21,6 +20,7 @@ variables:
     value: '$(Build.BuildId)'
 
 steps:
+
 - checkout: self
 
 - task: UseDotNet@2
@@ -32,22 +32,22 @@ steps:
 - script: |
     dotnet restore SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj
     dotnet build SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj --configuration $(buildConfiguration) --no-restore
-  displayName: 'Build SmartShopAPI (.NET)'
+  displayName: 'Build API'
 
 - script: |
     dotnet test SmartShopAPI/SmartShopAPI.Tests/SmartShopAPI.Tests.csproj --configuration $(buildConfiguration) --verbosity normal
-  displayName: 'Test SmartShopAPI'
+  displayName: 'Test API'
 
 - task: NodeTool@0
   inputs:
     versionSpec: '20.x'
-  displayName: 'Install Node.js 20.x'
+  displayName: 'Install Node.js'
 
 - script: |
     cd SmartShopUI/SmartShopUI
     npm ci
     npm run build --if-present
-  displayName: 'Build SmartShopUI (Angular)'
+  displayName: 'Build UI'
 
 - task: AzureCLI@2
   inputs:
@@ -55,21 +55,32 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      Write-Host "Fetching ACR credentials and logging in..."
-      $acrName = "smartshop"
-      $acrServer = "$acrName.azurecr.io"
-      $acrUser = az acr credential show --name $acrName --query "username" -o tsv
-      $acrPass = az acr credential show --name $acrName --query "passwords[0].value" -o tsv
-      docker login $acrServer -u $acrUser -p $acrPass
-  displayName: 'Login to ACR (direct Docker login)'
+      docker login $(acrServer) --username $(DOCKER_REGISTRY_SERVER_USERNAME) --password $(DOCKER_REGISTRY_SERVER_PASSWORD)
+  displayName: 'Login to ACR'
 
 - script: |
-    docker build -t smartshop.azurecr.io/smartshopapi:$(Build.BuildId) ./SmartShopAPI/SmartShopAPI
-    docker build -t smartshop.azurecr.io/smartshopui:$(Build.BuildId) ./SmartShopUI/SmartShopUI
-  displayName: 'Build Docker images'
+    docker build -t $(acrServer)/$(apiImageName):$(tag) ./SmartShopAPI/SmartShopAPI
+    docker build \
+      --build-arg API_URL=$(API_URL) \
+      -t $(acrServer)/$(uiImageName):$(tag) \
+      ./SmartShopUI/SmartShopUI
+  displayName: 'Build Docker Images'
 
 - script: |
-    docker push smartshop.azurecr.io/smartshopapi:$(Build.BuildId)
-    docker push smartshop.azurecr.io/smartshopui:$(Build.BuildId)
-  displayName: 'Push Docker images to ACR'
+    docker push $(acrServer)/$(apiImageName):$(tag)
+    docker push $(acrServer)/$(uiImageName):$(tag)
+  displayName: 'Push Docker Images'
 
+- task: AzureWebAppContainer@1
+  inputs:
+    azureSubscription: 'AzureConnection'
+    appName: 'smartshop-api'
+    imageName: '$(acrServer)/$(apiImageName):$(tag)'
+  displayName: 'Deploy API'
+
+- task: AzureWebAppContainer@1
+  inputs:
+    azureSubscription: 'AzureConnection'
+    appName: 'smartshop-ui'
+    imageName: '$(acrServer)/$(uiImageName):$(tag)'
+  displayName: 'Deploy UI'
