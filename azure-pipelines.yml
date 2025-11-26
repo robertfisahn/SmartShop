@@ -51,11 +51,11 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'AzureConnection'
+    azureSubscription: 'smartshop-connection'
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      docker login $(acrServer) --username $(DOCKER_REGISTRY_SERVER_USERNAME) --password $(DOCKER_REGISTRY_SERVER_PASSWORD)
+      az acr login --name acrsmartshop
   displayName: 'Login to ACR'
 
 - script: |
@@ -73,14 +73,14 @@ steps:
 
 - task: AzureWebAppContainer@1
   inputs:
-    azureSubscription: 'AzureConnection'
+    azureSubscription: 'smartshop-connection'
     appName: 'smartshop-api'
     imageName: '$(acrServer)/$(apiImageName):$(tag)'
   displayName: 'Deploy API'
 
 - task: AzureWebAppContainer@1
   inputs:
-    azureSubscription: 'AzureConnection'
+    azureSubscription: 'smartshop-connection'
     appName: 'smartshop-ui'
     imageName: '$(acrServer)/$(uiImageName):$(tag)'
   displayName: 'Deploy UI'
