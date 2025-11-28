@@ -20,7 +20,6 @@ variables:
     value: '$(Build.BuildId)'
 
 steps:
-
 - checkout: self
 
 - task: UseDotNet@2
@@ -31,7 +30,7 @@ steps:
 
 - script: |
     dotnet restore SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj
-    dotnet build SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj --configuration $(buildConfiguration) --no-restore
+    dotnet build SmartShopAPI/SmartShopAPI/SmartShopAPI.csproj --configuration $(buildConfiguration)
   displayName: 'Build API'
 
 - script: |
@@ -47,7 +46,14 @@ steps:
     cd SmartShopUI/SmartShopUI
     npm ci
     npm run build --if-present
-  displayName: 'Build UI'
+  displayName: 'Build UI (Angular)'
+
+- powershell: |
+    Write-Host "Injecting API_URL into env.js"
+    $apiUrl = "$(API_URL)"
+    $content = "window.env = { apiUrl: '$apiUrl' };"
+    Set-Content -Path "SmartShopUI/SmartShopUI/src/assets/env.js" -Value $content -Encoding UTF8
+  displayName: 'Inject API_URL into env.js (frontend)'
 
 - task: AzureCLI@2
   inputs:
@@ -58,18 +64,15 @@ steps:
       az acr login --name acrsmartshop
   displayName: 'Login to ACR'
 
-- script: |
+- powershell: |
     docker build -t $(acrServer)/$(apiImageName):$(tag) ./SmartShopAPI/SmartShopAPI
-    docker build \
-      --build-arg API_URL=$(API_URL) \
-      -t $(acrServer)/$(uiImageName):$(tag) \
-      ./SmartShopUI/SmartShopUI
+    docker build -t $(acrServer)/$(uiImageName):$(tag) ./SmartShopUI/SmartShopUI
   displayName: 'Build Docker Images'
 
-- script: |
+- powershell: |
     docker push $(acrServer)/$(apiImageName):$(tag)
     docker push $(acrServer)/$(uiImageName):$(tag)
-  displayName: 'Push Docker Images'
+  displayName: 'Push Docker Images to ACR'
 
 - task: AzureWebAppContainer@1
   inputs:
