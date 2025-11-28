@@ -31,6 +31,8 @@ using SmartShopAPI.Services;
 DotNetEnv.Env.Load("../../.env");
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
+var allowedUi = builder.Configuration["AllowedUi"]
+                ?? "http://localhost:4200";
 builder.Services.AddHealthChecks();
 
 var authenticationSettings = new AuthenticationSettings();
@@ -167,7 +169,7 @@ builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSmartShopUI",
-        builder => builder.WithOrigins("http://localhost:4200", "http://localhost:4288", "http://127.0.0.1:4200")
+        builder => builder.WithOrigins(allowedUi, "http://localhost:4288", "http://127.0.0.1:4200")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
 });
