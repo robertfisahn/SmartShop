@@ -104,7 +104,7 @@ if (!builder.Environment.IsEnvironment("IntegrationTest"))
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<SmartShopSeeder>();
-builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
+builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
