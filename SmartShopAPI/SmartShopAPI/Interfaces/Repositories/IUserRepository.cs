@@ -10,5 +10,6 @@ namespace SmartShopAPI.Interfaces.Repositories
         Task AddAsync(User user);
         Task<bool> EmailExistsAsync(string email);
         Task SaveChangesAsync();
+        Task<User?> GetShippingAddress(int userId);
     }
 }

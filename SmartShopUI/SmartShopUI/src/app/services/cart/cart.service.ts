@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
-import { CartItem } from '../../models/cartItem.dto.';
 import { environment } from 'src/environments/environment';
+import { CartItemDto } from '../../models/cart/cart-item.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -53,7 +53,7 @@ export class CartService {
 
   getTotalQuantity(): Observable<number> {
     return this.getCart().pipe(
-      map((items: CartItem[]) => {
+      map((items: CartItemDto[]) => {
         return items.reduce((total, item) => total + item.quantity, 0);
       })
     );
@@ -75,7 +75,7 @@ export class CartService {
 
   getCartItemQuantity(productId: number): Observable<number> {
     return this.getCart().pipe(
-      map((items: CartItem[]) => {
+      map((items: CartItemDto[]) => {
         const item = items.find(i => i.productId === productId);
         return item ? item.quantity : 0;
       })

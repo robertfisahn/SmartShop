@@ -5,7 +5,7 @@ namespace SmartShopAPI.Interfaces.Services
 {
     public interface ICartService
     {
-        Task<IEnumerable<CartItem>> GetCart(int userId);
+        Task<IEnumerable<CartItemDto>> GetCart(int userId);
         Task<int> AddCartItem(CreateCartItemDto dto, int userId);
         Task<CartItem> GetCartItemById(int cartItemId);
         Task DeleteCartItem(int cartItemId);

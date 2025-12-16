@@ -11,7 +11,7 @@ namespace SmartShopAPI.Services
     public class CartService(ICartRepository cartRepository, IMapper mapper) : ICartService
     {
 
-        public async Task<IEnumerable<CartItem>> GetCart(int userId) => await cartRepository.GetCartAsync(userId);
+        public async Task<IEnumerable<CartItemDto>> GetCart(int userId) => await cartRepository.GetCartAsync(userId);
 
         public async Task<CartItem> GetCartItemById(int cartItemId) =>
             await cartRepository.GetCartItemByIdAsync(cartItemId) ?? throw new NotFoundException("Cart item not found");

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models.Dtos.Order;
+using SmartShopAPI.Models.Dtos.Payment;
 
 namespace SmartShopAPI.Controllers
 {
@@ -18,10 +19,14 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> Create()
+        public async Task<ActionResult<PlaceOrderResponse>> Create([FromBody] PlaceOrderRequest request)
         {
-            var id = await orderService.PlaceOrder(userContextService.GetUserId());
-            return CreatedAtAction(nameof(GetById), new { orderId = id }, new { orderId = id });
+            var result = await orderService.PlaceOrder(
+                userContextService.GetUserId(),
+                request.Provider
+            );
+
+            return Ok(result);
         }
 
         [HttpGet("{orderId}")]
@@ -44,5 +49,11 @@ namespace SmartShopAPI.Controllers
             return Ok(await orderService.GetUserOrders(userContextService.GetUserId()));
         }
 
+        [HttpGet("checkout-data")]
+        public async Task<ActionResult<CheckoutDataDto>> GetCheckoutData()
+        {
+            var result = await orderService.GetCheckoutData(userContextService.GetUserId());
+            return Ok(result);
+        }
     }
 }
