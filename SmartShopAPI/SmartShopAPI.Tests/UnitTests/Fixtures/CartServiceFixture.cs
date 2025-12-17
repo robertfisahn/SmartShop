@@ -4,7 +4,9 @@ using Moq;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Services;
+using SmartShopAPI.Tests.UnitTests.Helpers;
 
 namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {
@@ -14,105 +16,101 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
         public Mock<IMapper> MockMapper { get; }
         public CartService Service { get; }
 
-        public List<CartItem> CartItems { get; }
+        private List<CartItem> _cartEntities;
+        public IReadOnlyList<CartItem> CartItems => _cartEntities;
 
         public CartServiceFixture()
         {
             MockCartRepository = new Mock<ICartRepository>();
             MockMapper = new Mock<IMapper>();
 
-            CartItems = new List<CartItem>
-            {
-                new() { Id = 1, UserId = 1, ProductId = 10, Quantity = 2 },
-                new() { Id = 2, UserId = 1, ProductId = 11, Quantity = 1 },
-                new() { Id = 3, UserId = 2, ProductId = 12, Quantity = 5 },
-            };
+            _cartEntities = CartTestData.GetCartItems();
 
             SetupRepository();
             SetupMapper();
 
-            Service = new CartService(MockCartRepository.Object, MockMapper.Object);
+            Service = new CartService(
+                MockCartRepository.Object,
+                MockMapper.Object
+            );
         }
 
         private void SetupRepository()
         {
-            MockCartRepository.Setup(r => r.GetCartAsync(It.Is<int>(u => true)))
+            MockCartRepository
+                .Setup(r => r.GetCartAsync(It.IsAny<int>()))
                 .ReturnsAsync((int userId) =>
-                {
-                    var result = CartItems.Where(c => c.UserId == userId).ToList();
-                    return result;
-                });
+                    _cartEntities
+                        .Where(x => x.UserId == userId)
+                        .Select(x => new CartItemDto
+                        {
+                            Id = x.Id,
+                            ProductId = x.ProductId,
+                            Quantity = x.Quantity,
+                            ProductName = x.Product?.Name,
+                            ProductPrice = x.Product?.Price ?? 0,
+                            ProductStockQuantity = x.Product?.StockQuantity ?? 0,
+                            ProductImagePath = x.Product?.ImagePath
+                        })
+                        .ToList()
+                );
 
-            MockCartRepository.Setup(r => r.GetCartItemByIdAsync(It.Is<int>(id => true)))
+            MockCartRepository
+                .Setup(r => r.GetCartItemByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((int id) =>
-                {
-                    var found = CartItems.FirstOrDefault(c => c.Id == id);
-                    return found;
-                });
+                    _cartEntities.FirstOrDefault(x => x.Id == id)
+                );
 
-            MockCartRepository.Setup(r =>
-                    r.GetCartItemByUserAndProductAsync(It.Is<int>(u => true), It.Is<int>(p => true)))
+            MockCartRepository
+                .Setup(r => r.GetCartItemByUserAndProductAsync(It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync((int userId, int productId) =>
-                {
-                    var found = CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
-                    return found;
-                });
+                    _cartEntities.FirstOrDefault(x =>
+                        x.UserId == userId && x.ProductId == productId)
+                );
 
-            MockCartRepository.Setup(r => r.AddCartItemAsync(It.IsAny<CartItem>()))
-                .Callback((CartItem item) =>
+            MockCartRepository
+                .Setup(r => r.AddCartItemAsync(It.IsAny<CartItem>()))
+                .Callback<CartItem>(item =>
                 {
-                    item.Id = CartItems.Any() ? CartItems.Max(c => c.Id) + 1 : 1;
-                    if (item.UserId == 0)
-                        item.UserId = 1;
-
-                    CartItems.Add(item);
+                    item.Id = _cartEntities.Max(x => x.Id) + 1;
+                    _cartEntities.Add(item);
                 })
                 .Returns(Task.CompletedTask);
 
-            MockCartRepository.Setup(r => r.DeleteCartItem(It.IsAny<CartItem>()))
-                .Callback((CartItem item) =>
-                {
-                    CartItems.Remove(item);
-                });
+            MockCartRepository
+                .Setup(r => r.DeleteCartItem(It.IsAny<CartItem>()))
+                .Callback<CartItem>(item => _cartEntities.Remove(item));
 
-            MockCartRepository.Setup(r => r.ClearCartAsync(It.Is<int>(u => true)))
-                .Callback((int userId) =>
+            MockCartRepository
+                .Setup(r => r.ClearCartAsync(It.IsAny<int>()))
+                .Callback<int>(userId =>
                 {
-                    var count = CartItems.RemoveAll(c => c.UserId == userId);
+                    _cartEntities.RemoveAll(x => x.UserId == userId);
                 })
                 .Returns(Task.CompletedTask);
 
-            MockCartRepository.Setup(r => r.SaveChangesAsync())
+            MockCartRepository
+                .Setup(r => r.SaveChangesAsync())
                 .Returns(Task.CompletedTask);
         }
+
 
         private void SetupMapper()
         {
-            MockMapper.Setup(m => m.Map<CartItem>(It.IsAny<object>()))
-                .Returns((object dto) =>
-                {
-                    if (dto is Models.Dtos.CartItem.CreateCartItemDto createDto)
+            MockMapper
+                .Setup(m => m.Map<CartItem>(It.IsAny<CreateCartItemDto>()))
+                .Returns((CreateCartItemDto dto) =>
+                    new CartItem
                     {
-                        return new CartItem
-                        {
-                            ProductId = createDto.ProductId,
-                            Quantity = createDto.Quantity
-                        };
-                    }
-
-                    return new CartItem();
-                });
+                        ProductId = dto.ProductId,
+                        Quantity = dto.Quantity
+                    });
         }
+
 
         public void ResetCart()
         {
-            CartItems.Clear();
-            CartItems.AddRange(new List<CartItem>
-            {
-                new() { Id = 1, UserId = 1, ProductId = 10, Quantity = 2 },
-                new() { Id = 2, UserId = 1, ProductId = 11, Quantity = 1 },
-                new() { Id = 3, UserId = 2, ProductId = 12, Quantity = 5 },
-            });
+            _cartEntities = CartTestData.GetCartItems();
         }
     }
 }

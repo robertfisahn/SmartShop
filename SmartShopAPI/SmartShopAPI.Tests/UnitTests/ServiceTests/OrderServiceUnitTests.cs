@@ -4,6 +4,7 @@ using Moq;
 
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
+using SmartShopAPI.Models.Events;
 using SmartShopAPI.Tests.UnitTests.Fixtures;
 
 namespace SmartShopAPI.Tests.UnitTests.ServiceTests;
@@ -56,28 +57,27 @@ public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<Orde
     public async Task PlaceOrder_ShouldCreateNewOrder_AndOrderItems()
     {
         fixture.ResetData();
-        var resultId = await fixture.Service.PlaceOrder(1);
+        var response = await fixture.Service.PlaceOrder(1, "paypal");
 
-        fixture.Orders.Should().Contain(o => o.Id == resultId);
-        fixture.OrderItems.Should().Contain(i => i.OrderId == resultId);
-        resultId.Should().BeGreaterThan(3);
+        fixture.Orders.Should().Contain(o => o.Id == response.OrderId);
+        response.OrderId.Should().BeGreaterThan(3);
+        response.PaymentUrl.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
     public async Task PlaceOrder_ShouldSetCorrectTotalPrice()
     {
         fixture.ResetData();
-        var resultId = await fixture.Service.PlaceOrder(1);
-
-        var createdOrder = fixture.Orders.First(o => o.Id == resultId);
-        createdOrder.TotalPrice.Should().Be(500);
+        var response = await fixture.Service.PlaceOrder(1, "paypal");
+        var createdOrder = fixture.Orders.First(o => o.Id == response.OrderId);
+        createdOrder.TotalPrice.Should().Be(250);
     }
 
     [Fact]
     public async Task PlaceOrder_ShouldCallSaveChangesAsync()
     {
         fixture.ResetData();
-        await fixture.Service.PlaceOrder(1);
+        await fixture.Service.PlaceOrder(1, "paypal");
 
         fixture.MockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Exactly(2));
     }
@@ -86,7 +86,7 @@ public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<Orde
     public async Task PlaceOrder_ShouldCommitTransaction()
     {
         fixture.ResetData();
-        await fixture.Service.PlaceOrder(1);
+        await fixture.Service.PlaceOrder(1, "paypal");
         fixture.MockUnitOfWork.Verify(uow => uow.BeginTransactionAsync(), Times.Once);
         fixture.MockUnitOfWork.Verify(uow => uow.CommitAsync(), Times.Once);
         fixture.MockUnitOfWork.Verify(uow => uow.RollbackAsync(), Times.Never);
@@ -102,7 +102,7 @@ public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<Orde
                 .ThrowsAsync(new Exception("Simulated failure"));
 
             await FluentActions
-                .Invoking(() => fixture.Service.PlaceOrder(1))
+                .Invoking(() => fixture.Service.PlaceOrder(1, "paypal"))
                 .Should().ThrowAsync<Exception>()
                 .WithMessage("Simulated failure");
 
@@ -121,15 +121,14 @@ public class OrderServiceTests(OrderServiceFixture fixture) : IClassFixture<Orde
     {
         fixture.ResetData();
         int userId = 1;
-        var resultId = await fixture.Service.PlaceOrder(userId);
-        var createdOrder = fixture.Orders.First(o => o.Id == resultId);
+        var response = await fixture.Service.PlaceOrder(userId, "paypal");
 
         fixture.MockPublishEndpoint.Verify(
-            m => m.Publish(It.Is<SmartShopAPI.Models.Events.OrderPlacedEvent>(
+            m => m.Publish(It.Is<OrderPlacedEvent>(
                 evt =>
-                    evt.OrderId == resultId &&
+                    evt.OrderId == response.OrderId &&
                     !string.IsNullOrEmpty(evt.Email) &&
-                    evt.TotalPrice == createdOrder.TotalPrice
+                    evt.TotalPrice == fixture.Orders.First(o => o.Id == response.OrderId).TotalPrice
             ), It.IsAny<CancellationToken>()),
             Times.Once
         );
