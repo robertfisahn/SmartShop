@@ -3,13 +3,26 @@
 using SmartShopAPI.Data;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Models.Dtos.CartItem;
 
 namespace SmartShopAPI.Repositories
 {
     public class CartRepository(SmartShopDbContext context) : ICartRepository
     {
-        public async Task<IEnumerable<CartItem>> GetCartAsync(int userId) =>
-            await context.CartItems.Include(p => p.Product).Where(x => x.UserId == userId).ToListAsync();
+        public async Task<IEnumerable<CartItemDto>> GetCartAsync(int userId) =>
+            await context.CartItems
+                .Where(x => x.UserId == userId)
+                .Select(x => new CartItemDto
+                {
+                    Id = x.Id,
+                    Quantity = x.Quantity,
+                    ProductId = x.ProductId,
+                    ProductName = x.Product.Name,
+                    ProductPrice = x.Product.Price,
+                    ProductStockQuantity = x.Product.StockQuantity,
+                    ProductImagePath = x.Product.ImagePath
+                })
+                .ToListAsync();
 
         public async Task<CartItem?> GetCartItemByIdAsync(int cartItemId) =>
             await context.CartItems.Include(p => p.Product).FirstOrDefaultAsync(x => x.Id == cartItemId);

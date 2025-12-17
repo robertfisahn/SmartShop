@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { CartService } from '../cart/cart.service';
 import { Order } from '../../models/order.dto';
+import { PlaceOrderResponse } from '../../models/order/place-order-response';
 
 @Injectable({
   providedIn: 'root'
@@ -38,4 +39,12 @@ export class OrderService {
   getUserOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(`${this.apiUrl}`);
   }
+
+  placeOrder(provider: string): Observable<PlaceOrderResponse> {
+    return this.http.post<PlaceOrderResponse>(
+      `${this.apiUrl}`,
+      { provider }
+    );
+  }
+
 }

@@ -1,4 +1,5 @@
 ﻿using SmartShopAPI.Interfaces;
+using SmartShopAPI.Models.Enums;
 
 namespace SmartShopAPI.Entities
 {
@@ -12,5 +13,8 @@ namespace SmartShopAPI.Entities
         public int AddressId { get; set; }
         public virtual Address Address { get; set; }
         public virtual List<OrderItem> OrderItems { get; set; }
+        public string? PaymentProviderOrderId { get; set; }
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+
     }
 }

@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { CartItem } from '../../models/cartItem.dto.';
+import { CartItemDto } from '../../models/cart/cart-item.dto';
 import { CartService } from '../../services/cart/cart.service';
-import { ProductDto } from '../../models/product.dto';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order/order.service';
+import { CheckoutService } from '../../services/checkout/checkout.service';
 
 @Component({
     selector: 'app-cart',
@@ -14,17 +14,17 @@ import { OrderService } from '../../services/order/order.service';
 })
 export class CartComponent implements OnInit {
   private apiUrl = `${environment.apiUrl}`;
-  cartItems: CartItem[] = [];
+  cartItems: CartItemDto[] = [];
   userId: number = 0;
   totalAmount = 0;
 
-  constructor(private cartService: CartService, private router: Router, private orderService: OrderService) { }
+  constructor(private cartService: CartService, private router: Router, private orderService: OrderService, private checkoutService: CheckoutService) { }
 
   ngOnInit(): void {
     this.userId = +sessionStorage.getItem('userId')!;
 
     this.cartService.getCart().subscribe(
-      (items: CartItem[]) => {
+      (items: CartItemDto[]) => {
         this.cartItems = items;
         this.calculateTotal();
       },
@@ -35,7 +35,7 @@ export class CartComponent implements OnInit {
   }
 
   calculateTotal(): void {
-    this.totalAmount = this.cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    this.totalAmount = this.cartItems.reduce((sum, item) => sum + item.productPrice * item.quantity, 0);
   }
 
   loadCart(): void {
@@ -69,11 +69,11 @@ export class CartComponent implements OnInit {
 
   getProductStock(itemId: number): number {
     const item = this.cartItems.find(i => i.id === itemId);
-    return item ? item.product.stockQuantity : 0;
+    return item ? item.productStockQuantity : 0;
   }
 
-  getProductImageUrl(product: ProductDto): string {
-    return `${this.apiUrl}/${product.imagePath}`;
+  getProductImageUrl(path: string): string {
+    return `${this.apiUrl}/${path}`;
   }
 
   clearCart(): void {
@@ -83,15 +83,13 @@ export class CartComponent implements OnInit {
     );
   }
 
-  goToCreateOrder(): void {
-    this.orderService.createOrder().subscribe({
-      next: (orderId) => {
-        console.log('Order created successfully:', orderId);
-        this.router.navigate([`/order-details/${orderId}`]);
+  navigateToOrderConfirmation(): void {
+    this.checkoutService.loadCheckoutData().subscribe({
+      next: (data) => {
+        this.checkoutService.setData(data);
+        this.router.navigate(['/order-confirmation']);
       },
-      error: (err) => {
-        console.error('Error creating order:', err);
-      }
+      error: (err) => console.error('Error loading checkout data:', err)
     });
   }
 }

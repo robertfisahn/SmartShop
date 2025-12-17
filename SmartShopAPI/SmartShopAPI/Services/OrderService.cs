@@ -7,14 +7,16 @@ using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Models.Dtos.Order;
+using SmartShopAPI.Models.Dtos.Payment;
 using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService,
         IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository,
-        IUnitOfWork unitOfWork, IPublishEndpoint publishEndpoint) : IOrderService
+        IUnitOfWork unitOfWork, IPublishEndpoint publishEndpoint, IPaymentService paymentService) : IOrderService
     {
         public async Task<OrderDto> GetById(int orderId, int userId)
         {
@@ -22,47 +24,55 @@ namespace SmartShopAPI.Services
             return mapper.Map<OrderDto>(order);
         }
 
-        public async Task<int> PlaceOrder(int userId)
+        public async Task<PlaceOrderResponse> PlaceOrder(int userId, string provider)
         {
             var cartItems = await cartService.GetCart(userId);
 
             await unitOfWork.BeginTransactionAsync();
+
+            Order order;
             try
             {
-                var order = await CreateOrder(cartItems, userId);
-                await unitOfWork.SaveChangesAsync(); // < save for order id
-                var orderItems = await CreateOrderItems(cartItems, order.Id);
+                order = await CreateOrder(cartItems, userId);
+                await unitOfWork.SaveChangesAsync();
 
+                var orderItems = await CreateOrderItems(cartItems, order.Id);
                 await productService.UpdateStock(orderItems);
                 await cartService.ClearCart(userId);
 
                 var orderEvent = new OrderPlacedEvent
                 {
                     OrderId = order.Id,
-                    Email = (await accountService.GetEmailByIdAsync(userId)),
+                    Email = await accountService.GetEmailByIdAsync(userId),
                     TotalPrice = order.TotalPrice,
-                    ProductNames = orderItems.Select(x => x.Product.Name).ToList()
+                    ProductNames = cartItems.Select(x => x.ProductName).ToList()
                 };
                 await publishEndpoint.Publish(orderEvent);
 
                 await unitOfWork.SaveChangesAsync();
                 await unitOfWork.CommitAsync();
-
-                return order.Id;
             }
             catch
             {
                 await unitOfWork.RollbackAsync();
                 throw;
             }
+
+            var payment = await paymentService.StartPaymentAsync(order.Id, order.TotalPrice, provider);
+
+            return new PlaceOrderResponse
+            {
+                OrderId = order.Id,
+                PaymentUrl = payment.PaymentUrl
+            };
         }
 
-        private async Task<Order> CreateOrder(IEnumerable<CartItem> cartItems, int userId)
+        private async Task<Order> CreateOrder(IEnumerable<CartItemDto> cartItems, int userId)
         {
             var addressId = await accountService.GetAddressId(userId);
             Order order = new()
             {
-                TotalPrice = cartItems.Sum(x => x.Quantity * x.Product.Price),
+                TotalPrice = cartItems.Sum(x => x.Quantity * x.ProductPrice),
                 UserId = userId,
                 AddressId = addressId
             };
@@ -76,7 +86,7 @@ namespace SmartShopAPI.Services
             return mapper.Map<IEnumerable<OrderDto>>(orders);
         }
 
-        private async Task<List<OrderItem>> CreateOrderItems(IEnumerable<CartItem> cartItems, int orderId)
+        private async Task<List<OrderItem>> CreateOrderItems(IEnumerable<CartItemDto> cartItems, int orderId)
         {
             var orderItems = mapper.Map<List<OrderItem>>(cartItems);
             foreach (var item in orderItems)
@@ -86,5 +96,20 @@ namespace SmartShopAPI.Services
             await orderItemRepository.AddOrderItemsAsync(orderItems);
             return orderItems;
         }
+
+        public async Task<CheckoutDataDto> GetCheckoutData(int userId)
+        {
+            var cartItems = await cartService.GetCart(userId);
+            var address = await accountService.GetShippingAddress(userId);
+            var providers = paymentService.GetAvailableProviders();
+
+            return new CheckoutDataDto
+            {
+                CartItems = cartItems.ToList(),
+                Address = address,
+                Providers = providers
+            };
+        }
+
     }
 }

@@ -9,8 +9,11 @@ using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services;
 using SmartShopAPI.Models;
+using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Models.Dtos.Order;
+using SmartShopAPI.Models.Dtos.Payment;
 using SmartShopAPI.Services;
+using SmartShopAPI.Tests.UnitTests.Helpers;
 
 namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {
@@ -24,15 +27,15 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
         public Mock<IAccountService> MockAccountService { get; }
         public Mock<IOrderItemRepository> MockOrderItemRepository { get; }
         public Mock<IPublishEndpoint> MockPublishEndpoint { get; }
+        public Mock<IPaymentService> MockPaymentService { get; }
+
         public OrderService Service { get; }
 
         private readonly List<Order> _orders;
         private readonly List<OrderItem> _orderItems;
-        private readonly List<CartItem> _cartItems;
 
         public List<Order> Orders => _orders;
         public List<OrderItem> OrderItems => _orderItems;
-        public List<CartItem> CartItems => _cartItems;
 
         public OrderServiceFixture()
         {
@@ -44,10 +47,10 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
             MockAccountService = new Mock<IAccountService>();
             MockOrderItemRepository = new Mock<IOrderItemRepository>();
             MockPublishEndpoint = new Mock<IPublishEndpoint>();
+            MockPaymentService = new Mock<IPaymentService>();
 
-            _orderItems = BuildOrderItems();
-            _orders = BuildOrders();
-            _cartItems = BuildCartItems();
+            _orderItems = OrderTestData.DefaultOrderItems();
+            _orders = OrderTestData.DefaultOrders(_orderItems);
 
             SetupRepositories();
             SetupMappers();
@@ -61,107 +64,19 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
                 MockAccountService.Object,
                 MockOrderItemRepository.Object,
                 MockUnitOfWork.Object,
-                MockPublishEndpoint.Object
+                MockPublishEndpoint.Object,
+                MockPaymentService.Object
             );
-        }
-        private List<Order> BuildOrders()
-        {
-            var orders = new List<Order>
-            {
-                new()
-                {
-                    Id = 1,
-                    TotalPrice = 200.00M,
-                    UserId = 1,
-                    AddressId = 101,
-                    Address = new Address
-                    {
-                        Street = "Order1Street",
-                        City = "Order1City",
-                        PostalCode = "Order1PC"
-                    }
-                },
-                new()
-                {
-                    Id = 2,
-                    TotalPrice = 200.00M,
-                    UserId = 2,
-                    AddressId = 102,
-                    Address = new Address
-                    {
-                        Street = "Order2Street",
-                        City = "Order2City",
-                        PostalCode = "Order2PC"
-                    }
-                },
-                new()
-                {
-                    Id = 3,
-                    TotalPrice = 900.00M,
-                    UserId = 2,
-                    AddressId = 103,
-                    Address = new Address
-                    {
-                        Street = "Order3Street",
-                        City = "Order3City",
-                        PostalCode = "Order3PC"
-                    }
-                }
-            };
-
-            foreach (var order in orders)
-            {
-                order.OrderItems = _orderItems.Where(x => x.OrderId == order.Id).ToList();
-            }
-
-            return orders;
-        }
-
-        private List<OrderItem> BuildOrderItems()
-        {
-            return
-                [
-                    new() { Id = 1, OrderId = 1, ProductId = 1, Quantity = 2, Product = new Product { Name = "TestProduct1", Price = 100M } },
-                    new() { Id = 2, OrderId = 2, ProductId = 2, Quantity = 1, Product = new Product { Name = "TestProduct2", Price = 200M } },
-                    new() { Id = 3, OrderId = 3, ProductId = 3, Quantity = 3, Product = new Product { Name = "TestProduct3", Price = 300M } }
-                ];
-        }
-
-        private List<CartItem> BuildCartItems()
-        {
-            return
-            [
-                new()
-                {
-                    ProductId = 1,
-                    Quantity = 2,
-                    Product = new Product { Id = 1, Name = "Product1", Price = 100M }
-                },
-                new()
-                {
-                    ProductId = 2,
-                    Quantity = 1,
-                    Product = new Product { Id = 2, Name = "Product2", Price = 150M }
-                },
-                new()
-                {
-                    ProductId = 3,
-                    Quantity = 3,
-                    Product = new Product { Id = 3, Name = "Product3", Price = 50M }
-                }
-            ];
         }
 
         public void ResetData()
         {
             _orderItems.Clear();
-            _orderItems.AddRange(BuildOrderItems());
+            _orderItems.AddRange(OrderTestData.DefaultOrderItems());
 
             _orders.Clear();
-            _orders.AddRange(BuildOrders());
+            _orders.AddRange(OrderTestData.DefaultOrders(_orderItems));
 
-            _cartItems.Clear();
-            _cartItems.AddRange(BuildCartItems());
             MockUnitOfWork.Invocations.Clear();
             MockPublishEndpoint.Invocations.Clear();
         }
@@ -188,7 +103,7 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
                 .Returns(Task.CompletedTask);
 
             MockCartService.Setup(c => c.GetCart(It.IsAny<int>()))
-                .ReturnsAsync(_cartItems);
+                .ReturnsAsync(CartTestData.GetCartItemDtos());
 
             MockAccountService.Setup(a => a.GetAddressId(It.IsAny<int>()))
                 .ReturnsAsync(1);
@@ -198,6 +113,14 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
             MockAccountService
                 .Setup(a => a.GetEmailByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync("testuser@example.com");
+
+            MockPaymentService
+                .Setup(p => p.StartPaymentAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string>()))
+                .ReturnsAsync(new PaymentInitResult
+                {
+                    ProviderOrderId = "TEST_ORDER_ID",
+                    PaymentUrl = "https://fake-payment.test"
+                });
         }
 
         private void SetupMappers()
@@ -233,13 +156,19 @@ namespace SmartShopAPI.Tests.UnitTests.Fixtures
                         Price = oi.Product.Price
                     }).ToList()
                 });
-            MockMapper.Setup(m => m.Map<List<OrderItem>>(It.IsAny<IEnumerable<CartItem>>()))
-                .Returns((IEnumerable<CartItem> cartItems) => cartItems.Select(c => new OrderItem
-                {
-                    ProductId = c.ProductId,
-                    Quantity = c.Quantity,
-                    Product = c.Product
-                }).ToList());
+            MockMapper.Setup(m => m.Map<List<OrderItem>>(It.IsAny<IEnumerable<CartItemDto>>()))
+                .Returns((IEnumerable<CartItemDto> cartItems) =>
+                    cartItems.Select(c => new OrderItem
+                    {
+                        ProductId = c.ProductId,
+                        Quantity = c.Quantity,
+                        Product = new Product
+                        {
+                            Id = c.ProductId,
+                            Name = c.ProductName,
+                            Price = c.ProductPrice
+                        }
+                    }).ToList());
         }
         private void SetupUnitOfWork()
         {

@@ -32,12 +32,21 @@ namespace SmartShopAPI
                 .ForPath(u => u.Address.City, d => d.MapFrom(r => r.City))
                 .ForPath(u => u.Address.Street, d => d.MapFrom(r => r.Street))
                 .ForPath(u => u.Address.PostalCode, d => d.MapFrom(r => r.PostalCode));
+            CreateMap<User, ShippingAddressDto>()
+                .ForMember(d => d.FirstName, o => o.MapFrom(s => s.FirstName))
+                .ForMember(d => d.LastName, o => o.MapFrom(s => s.LastName))
+                .ForMember(d => d.Street, o => o.MapFrom(s => s.Address.Street))
+                .ForMember(d => d.City, o => o.MapFrom(s => s.Address.City))
+                .ForMember(d => d.PostalCode, o => o.MapFrom(s => s.Address.PostalCode));
 
             CreateMap<CreateCartItemDto, CartItem>();
             CreateMap<CartItem, CartItemDto>()
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
-            CreateMap<CartItem, OrderItem>()
-                .ForMember(d => d.Id, o => o.Ignore());
+            CreateMap<CartItemDto, OrderItem>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.ProductId, o => o.MapFrom(s => s.ProductId))
+                .ForMember(d => d.Product, o => o.Ignore())
+                .ForMember(d => d.OrderId, o => o.Ignore());
 
             CreateMap<Order, OrderDto>()
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))

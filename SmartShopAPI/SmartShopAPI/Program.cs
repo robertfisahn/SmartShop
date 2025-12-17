@@ -24,6 +24,7 @@ using SmartShopAPI.Middleware;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 using SmartShopAPI.Models.Dtos.User;
+using SmartShopAPI.Models.Settings;
 using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
 using SmartShopAPI.Services;
@@ -38,6 +39,14 @@ builder.Services.AddHealthChecks();
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 builder.Services.AddSingleton(authenticationSettings);
+
+builder.Services.Configure<PayPalSettings>(
+    builder.Configuration.GetSection("PayPal")
+);
+
+var paymentSettings = new PaymentsSettings();
+builder.Configuration.GetSection("Payments").Bind(paymentSettings);
+builder.Services.AddSingleton(paymentSettings);
 
 var rabbitSettings = new RabbitMqSettings();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitSettings);
@@ -126,6 +135,10 @@ builder.Services.AddScoped<IValidator<UpsertProductDto>, CreateProductDtoValidat
 builder.Services.AddScoped<IValidator<QueryParams>, QueryParamsValidator>();
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<IPaymentProvider, PayPalProvider>();
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

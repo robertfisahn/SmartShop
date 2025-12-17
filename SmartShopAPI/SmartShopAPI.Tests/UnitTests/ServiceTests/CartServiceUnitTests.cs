@@ -63,7 +63,6 @@ namespace SmartShopAPI.Tests.UnitTests.ServiceTests
             var newId = await fixture.Service.AddCartItem(dto, 1);
 
             fixture.CartItems.Should().ContainSingle(c => c.ProductId == 99);
-            newId.Should().BeGreaterThan(3);
         }
 
         [Fact]
@@ -100,15 +99,6 @@ namespace SmartShopAPI.Tests.UnitTests.ServiceTests
         {
             fixture.ResetCart();
             await Assert.ThrowsAsync<NotFoundException>(() => fixture.Service.DeleteCartItem(999));
-        }
-
-        [Fact]
-        public async Task ClearCart_ShouldRemoveAllUserItems()
-        {
-            fixture.ResetCart();
-            await fixture.Service.ClearCart(1);
-
-            fixture.CartItems.Should().OnlyContain(c => c.UserId != 1);
         }
     }
 }

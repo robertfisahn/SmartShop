@@ -19,5 +19,10 @@ namespace SmartShopAPI.Repositories
         public async Task<bool> EmailExistsAsync(string email)
         => await context.Users.AnyAsync(u => u.Email == email);
         public async Task SaveChangesAsync() => await context.SaveChangesAsync();
+
+        public async Task<User?> GetShippingAddress(int userId) =>
+            await context.Users
+            .Include(u => u.Address)
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 }

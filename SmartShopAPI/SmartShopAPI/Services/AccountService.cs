@@ -81,5 +81,13 @@ namespace SmartShopAPI.Services
 
         public async Task<string?> GetEmailByIdAsync(int userId) =>
             await userRepository.GetEmailByIdAsync(userId);
+
+        public async Task<ShippingAddressDto?> GetShippingAddress(int userId)
+        {
+            var address = await userRepository.GetShippingAddress(userId);
+            if (address == null)
+                return null;
+            return mapper.Map<ShippingAddressDto>(address);
+        }
     }
 }

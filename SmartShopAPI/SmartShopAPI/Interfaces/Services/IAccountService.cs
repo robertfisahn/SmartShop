@@ -10,5 +10,6 @@ namespace SmartShopAPI.Interfaces.Services
         Task<ResponseDto> GenerateJwt(LoginDto dto);
         Task<int> GetAddressId(int userId);
         Task<string?> GetEmailByIdAsync(int userId);
+        Task<ShippingAddressDto?> GetShippingAddress(int userId);
     }
 }

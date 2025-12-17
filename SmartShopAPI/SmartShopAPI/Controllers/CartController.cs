@@ -20,7 +20,7 @@ namespace SmartShopAPI.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<CartItem>>> GetCart()
+        public async Task<ActionResult<IEnumerable<CartItemDto>>> GetCart()
         {
             return Ok(await cartService.GetCart(userContextService.GetUserId()));
         }
