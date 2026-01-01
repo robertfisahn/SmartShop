@@ -1,12 +1,6 @@
 name: .NET CI
 
 on:
-  push:
-    branches:
-      - "feature/**"
-      - "fix/**"
-      - "refactor/**"
-      - "ci/**"
   pull_request:
     branches: [ "master" ]
 
