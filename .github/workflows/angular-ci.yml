@@ -1,0 +1,28 @@
+name: Angular CI (Build Only)
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-angular:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: SmartShopUI/SmartShopUI/package-lock.json
+
+      - name: Install dependencies
+        working-directory: SmartShopUI/SmartShopUI
+        run: npm ci
+
+      - name: Build Angular application
+        working-directory: SmartShopUI/SmartShopUI
+        run: npm run build
