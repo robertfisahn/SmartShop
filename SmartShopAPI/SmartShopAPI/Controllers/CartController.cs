@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using SmartShopAPI.Authorization;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
+using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Models.Dtos.CartItem;
 
 namespace SmartShopAPI.Controllers

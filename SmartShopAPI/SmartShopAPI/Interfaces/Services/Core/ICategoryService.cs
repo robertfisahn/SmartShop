@@ -3,7 +3,7 @@
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
 
-namespace SmartShopAPI.Interfaces.Services
+namespace SmartShopAPI.Interfaces.Services.Core
 {
     public interface ICategoryService
     {

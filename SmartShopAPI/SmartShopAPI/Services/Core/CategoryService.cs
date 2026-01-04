@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class CategoryService(ICategoryRepository categoryRepository, IMapper mapper) : ICategoryService
     {

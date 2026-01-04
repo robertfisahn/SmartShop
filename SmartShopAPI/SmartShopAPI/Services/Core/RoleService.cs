@@ -1,7 +1,7 @@
 ﻿using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class RoleService(IRoleRepository roleRepository) : IRoleService
     {

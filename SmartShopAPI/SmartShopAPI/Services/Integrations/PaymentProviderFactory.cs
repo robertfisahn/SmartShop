@@ -1,6 +1,6 @@
-﻿using SmartShopAPI.Interfaces;
+﻿using SmartShopAPI.Interfaces.Services.Integrations;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Integrations
 {
     public class PaymentProviderFactory : IPaymentProviderFactory
     {

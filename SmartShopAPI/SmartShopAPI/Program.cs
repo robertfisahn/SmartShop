@@ -27,7 +27,9 @@ using SmartShopAPI.Models.Dtos.User;
 using SmartShopAPI.Models.Settings;
 using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
-using SmartShopAPI.Services;
+using SmartShopAPI.Services.Core;
+using SmartShopAPI.Services.Infrastructure;
+using SmartShopAPI.Services.Integrations;
 
 DotNetEnv.Env.Load("../../.env");
 var builder = WebApplication.CreateBuilder(args);

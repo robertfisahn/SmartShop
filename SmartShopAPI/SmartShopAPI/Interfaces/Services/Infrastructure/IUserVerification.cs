@@ -1,4 +1,4 @@
-﻿namespace SmartShopAPI.Interfaces
+﻿namespace SmartShopAPI.Interfaces.Services.Infrastructure
 {
     public interface IUserVerification
     {

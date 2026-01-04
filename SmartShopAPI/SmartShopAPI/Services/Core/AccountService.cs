@@ -10,12 +10,12 @@ using Microsoft.IdentityModel.Tokens;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.User;
 using SmartShopAPI.Repositories;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class AccountService(IUserRepository userRepository, IMapper mapper, IPasswordHasher<User> passwordHasher,
         AuthenticationSettings authenticationSettings, IRoleService roleService) : IAccountService
