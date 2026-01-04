@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
 
 using SmartShopAPI.Exceptions;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Infrastructure;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Infrastructure
 {
     public class UserContextService(IHttpContextAccessor contextAccessor) : IUserContextService
     {

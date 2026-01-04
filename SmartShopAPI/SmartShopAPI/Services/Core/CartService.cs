@@ -3,10 +3,10 @@
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Models.Dtos.CartItem;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class CartService(ICartRepository cartRepository, IMapper mapper) : ICartService
     {

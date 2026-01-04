@@ -2,7 +2,7 @@
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 
-namespace SmartShopAPI.Interfaces.Services
+namespace SmartShopAPI.Interfaces.Services.Core
 {
     public interface IProductService
     {

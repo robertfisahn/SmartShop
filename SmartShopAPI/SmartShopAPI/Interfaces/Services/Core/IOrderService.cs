@@ -2,7 +2,7 @@
 using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Models.Dtos.Payment;
 
-namespace SmartShopAPI.Interfaces.Services
+namespace SmartShopAPI.Interfaces.Services.Core
 {
     public interface IOrderService
     {

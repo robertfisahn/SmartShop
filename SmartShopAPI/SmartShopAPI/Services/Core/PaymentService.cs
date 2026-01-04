@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 
-using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
+using SmartShopAPI.Interfaces.Services.Integrations;
 using SmartShopAPI.Models.Dtos.Payment;
 using SmartShopAPI.Models.Enums;
 using SmartShopAPI.Models.Settings;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class PaymentService(IPaymentProviderFactory _factory, IOrderRepository _orders, IOptions<PaymentsSettings> _config) : IPaymentService
     {

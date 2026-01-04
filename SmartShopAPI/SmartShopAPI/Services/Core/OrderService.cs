@@ -6,13 +6,13 @@ using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Models.Dtos.Payment;
 using SmartShopAPI.Models.Events;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService,
         IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository,

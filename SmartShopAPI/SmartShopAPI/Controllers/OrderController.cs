@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
+using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Models.Dtos.Payment;
 

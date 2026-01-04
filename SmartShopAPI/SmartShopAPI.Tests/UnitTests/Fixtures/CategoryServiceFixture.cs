@@ -5,7 +5,7 @@ using Moq;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
-using SmartShopAPI.Services;
+using SmartShopAPI.Services.Core;
 
 namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {

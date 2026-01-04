@@ -1,9 +1,9 @@
 ﻿using MassTransit;
 
-using SmartShopAPI.Interfaces.Events;
+using SmartShopAPI.Interfaces.Services.Integrations;
 using SmartShopAPI.Models.Events;
 
-namespace SmartShopAPI.Services;
+namespace SmartShopAPI.Services.Infrastructure;
 
 public class OrderEmailConsumer(IEmailSender emailSender, ILogger<OrderEmailConsumer> logger) : IConsumer<OrderPlacedEvent>
 {

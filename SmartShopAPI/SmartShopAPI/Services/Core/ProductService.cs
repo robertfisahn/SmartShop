@@ -3,12 +3,13 @@
 using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Core;
+using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Core
 {
     public class ProductService(IProductRepository productRepository, IMapper mapper,
         ICategoryRepository categoryRepository, IFileService fileService) : IProductService

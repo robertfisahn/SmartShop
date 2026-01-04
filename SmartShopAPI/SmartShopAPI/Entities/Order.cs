@@ -1,4 +1,4 @@
-﻿using SmartShopAPI.Interfaces;
+﻿using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Models.Enums;
 
 namespace SmartShopAPI.Entities

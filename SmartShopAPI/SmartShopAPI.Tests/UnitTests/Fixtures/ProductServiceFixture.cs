@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Interfaces.Services;
+using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Services;
+using SmartShopAPI.Services.Core;
 
 namespace SmartShopAPI.Tests.UnitTests.Fixtures
 {

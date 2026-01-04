@@ -1,7 +1,7 @@
 ﻿using SmartShopAPI.Entities;
 using SmartShopAPI.Models.Dtos.CartItem;
 
-namespace SmartShopAPI.Interfaces.Services
+namespace SmartShopAPI.Interfaces.Services.Core
 {
     public interface ICartService
     {

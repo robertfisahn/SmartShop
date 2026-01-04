@@ -1,8 +1,7 @@
-﻿using SmartShopAPI.Interfaces.Events;
-
+﻿using SmartShopAPI.Interfaces.Services.Integrations;
 using SmartShopAPI.Models.Events;
 
-namespace SmartShopAPI.Services
+namespace SmartShopAPI.Services.Integrations
 {
     public class ResendEmailSender : IEmailSender
     {

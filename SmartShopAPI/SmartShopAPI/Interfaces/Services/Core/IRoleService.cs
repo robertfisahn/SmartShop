@@ -1,4 +1,4 @@
-﻿namespace SmartShopAPI.Interfaces.Services
+﻿namespace SmartShopAPI.Interfaces.Services.Core
 {
     public interface IRoleService
     {
