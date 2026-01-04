@@ -5,7 +5,7 @@ using Moq;
 using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Models.Dtos.CartItem;
-using SmartShopAPI.Services;
+using SmartShopAPI.Services.Core;
 using SmartShopAPI.Tests.UnitTests.Helpers;
 
 namespace SmartShopAPI.Tests.UnitTests.Fixtures
