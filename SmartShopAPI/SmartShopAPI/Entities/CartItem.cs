@@ -1,5 +1,4 @@
 ﻿using SmartShopAPI.Interfaces.Services.Infrastructure;
-using SmartShopAPI.Models;
 
 namespace SmartShopAPI.Entities
 {
@@ -8,8 +7,8 @@ namespace SmartShopAPI.Entities
         public int Id { get; set; }
         public int Quantity { get; set; }
         public int ProductId { get; set; }
-        public virtual Product Product { get; set; }
+        public Product Product { get; set; } = null!;
         public int UserId { get; set; }
-        public virtual User User { get; set; }
+        public User User { get; set; } = null!;
     }
 }

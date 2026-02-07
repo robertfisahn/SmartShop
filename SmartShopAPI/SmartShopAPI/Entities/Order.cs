@@ -7,14 +7,18 @@ namespace SmartShopAPI.Entities
     {
         public int Id { get; set; }
         public decimal TotalPrice { get; set; }
-        public int UserId { get; set; }
-        public virtual User User { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public int AddressId { get; set; }
-        public virtual Address Address { get; set; }
-        public virtual List<OrderItem> OrderItems { get; set; }
-        public string? PaymentProviderOrderId { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+        public string? PaymentMethod { get; set; }
+        public string? PaymentReference { get; set; }
 
+        public required string ShippingCity { get; set; }
+        public required string ShippingStreet { get; set; }
+        public required string ShippingPostalCode { get; set; }
+
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
+
+        public ICollection<OrderItem> OrderItems { get; set; } = [];
     }
 }
