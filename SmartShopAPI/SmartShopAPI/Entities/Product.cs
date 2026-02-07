@@ -1,21 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
-namespace SmartShopAPI.Models
+﻿namespace SmartShopAPI.Entities
 {
     public class Product
     {
         public int Id { get; set; }
-        [Required]
-        public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
+        public required string Name { get; set; }
+        public string? Description { get; set; }
         public decimal Price { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public DateTime UpdatedDate { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
         public int StockQuantity { get; set; }
         public int CategoryId { get; set; }
-        [JsonIgnore]
-        public virtual Category Category { get; set; }
+        public Category Category { get; set; } = null!;
         public string? ImagePath { get; set; }
     }
 }

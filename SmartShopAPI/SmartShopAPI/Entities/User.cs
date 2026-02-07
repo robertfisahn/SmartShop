@@ -1,22 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SmartShopAPI.Entities
+﻿namespace SmartShopAPI.Entities
 {
     public class User
     {
         public int Id { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        public string PasswordHash { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
+        public required string Email { get; set; }
+        public required string PasswordHash { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public int RoleId { get; set; }
-        public virtual Role Role { get; set; }
-        public int? AddressId { get; set; }
-        public virtual Address? Address { get; set; }
-        public virtual List<CartItem> CartItems { get; set; } = new List<CartItem>();
-        public virtual List<Order>? Order { get; set; }
+        public Role Role { get; set; } = null!;
+        
+        public ICollection<Address> Addresses { get; set; } = [];
+        public ICollection<CartItem> CartItems { get; set; } = [];
+        public ICollection<Order> Orders { get; set; } = [];
     }
 }

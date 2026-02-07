@@ -1,16 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SmartShopAPI.Entities
+﻿namespace SmartShopAPI.Entities
 {
     public class Address
     {
         public int Id { get; set; }
-        [MaxLength(50)]
-        public string? City { get; set; }
-        [MaxLength(50)]
-        public string? Street { get; set; }
-        public string? PostalCode { get; set; }
-        public virtual User? User { get; set; }
-        public virtual List<Order>? Order { get; set; }
+        public required string City { get; set; }
+        public required string Street { get; set; }
+        public required string PostalCode { get; set; }
+        public bool IsDefault { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
     }
 }
