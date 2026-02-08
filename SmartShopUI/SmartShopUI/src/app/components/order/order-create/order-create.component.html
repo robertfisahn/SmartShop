@@ -8,12 +8,12 @@
     <h3>Order Summary</h3>
     <p><strong>Order ID:</strong> {{ order.id }}</p>
     <p><strong>Total Price:</strong> {{ order.totalPrice | currency }}</p>
-    <p><strong>Created Date:</strong> {{ order.createdDate | date }}</p>
+    <p><strong>Created Date:</strong> {{ order.createdAt | date }}</p>
 
     <h4>Delivery Address</h4>
-    <p><strong>City:</strong> {{ order.address.city }}</p>
-    <p><strong>Street:</strong> {{ order.address.street }}</p>
-    <p><strong>Postal Code:</strong> {{ order.address.postalCode }}</p>
+    <p><strong>City:</strong> {{ order.city }}</p>
+    <p><strong>Street:</strong> {{ order.street }}</p>
+    <p><strong>Postal Code:</strong> {{ order.postalCode }}</p>
 
     <h4>Order Items</h4>
     <ul>

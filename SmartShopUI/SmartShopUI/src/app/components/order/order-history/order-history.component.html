@@ -25,18 +25,19 @@
         <div class="order-header" (click)="toggleOrderItems(order)">
           <div class="order-main-info">
             <span class="order-number">Order #{{ order.id }}</span>
-            <span class="order-date">{{ order.createdDate | date:'MMM d, y' }}</span>
+            <span class="order-date">{{ order.createdAt | date:'MMM d, y' }}</span>
           </div>
           <div class="order-summary">
             <span class="order-price">{{ order.totalPrice | currency }}</span>
-            <i class="expand-icon" [ngClass]="order.showMore ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'"></i>
+            <i class="expand-icon"
+              [ngClass]="order.showMore ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'"></i>
           </div>
         </div>
 
         <div class="order-details" [class.expanded]="order.showMore">
           <div class="order-address">
             <h4>Delivery Address</h4>
-            <p>{{ order.address }}</p>
+            <p>{{ order.street }}, {{ order.city }}, {{ order.postalCode }}</p>
           </div>
 
           <div class="order-products">
