@@ -5,7 +5,6 @@ using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Interfaces.Services.Infrastructure;
-using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos;
 using SmartShopAPI.Models.Dtos.Product;
 
@@ -89,7 +88,7 @@ namespace SmartShopAPI.Services.Core
             var product = await productRepository.GetByIdAsync(productId) ?? throw new NotFoundException("Product not found");
 
             await EnsureUniqueName(dto.Name, productId);
-            product.UpdatedDate = DateTime.Now;
+            product.UpdatedAt = DateTime.UtcNow;
             if (file != null)
             {
                 if (!IsDefaultImage(product.ImagePath))

@@ -26,6 +26,10 @@ namespace SmartShopAPI.Middleware
             {
                 await HandleExceptionAsync(context, HttpStatusCode.Forbidden, forbidException.Message);
             }
+            catch (PaymentException paymentException)
+            {
+                await HandleExceptionAsync(context, HttpStatusCode.BadGateway, paymentException.Message);
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, HttpStatusCode.InternalServerError, "Something went wrong.");

@@ -4,5 +4,5 @@ public interface IPaymentProvider
 {
     string Name { get; }
     Task<PaymentInitResult> CreatePaymentAsync(int orderId, decimal amount);
-    Task<PaymentStatusResult> VerifyPaymentAsync(string providerOrderId);
+    Task<PaymentStatusResult> VerifyPaymentAsync(string paymentReference);
 }

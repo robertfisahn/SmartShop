@@ -1,8 +1,11 @@
 ﻿using SmartShopAPI.Models.Dtos.Payment;
 
-public interface IPaymentService
+namespace SmartShopAPI.Interfaces.Services.Core
 {
-    Task<PaymentInitResult> StartPaymentAsync(int orderId, decimal amount, string providerName);
-    Task HandleWebhookAsync(string providerName, string providerOrderId);
-    List<PaymentProviderDto> GetAvailableProviders();
+    public interface IPaymentService
+    {
+        Task<PaymentInitResult> StartPaymentAsync(int orderId, decimal amount, string providerName);
+        Task HandleWebhookAsync(string providerName, string paymentReference);
+        List<PaymentProviderDto> GetAvailableProviders();
+    }
 }
