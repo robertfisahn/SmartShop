@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 using SmartShopAPI.Data;
+using SmartShopAPI.Entities;
 using SmartShopAPI.Interfaces.Repositories;
-using SmartShopAPI.Models;
 
 namespace SmartShopAPI.Repositories
 {
@@ -13,6 +13,7 @@ namespace SmartShopAPI.Repositories
         public async Task AddAsync(Category category) => await context.Categories.AddAsync(category);
         public void Delete(Category category) => context.Categories.Remove(category);
         public async Task<bool> ExistsAsync(int categoryId) => await context.Categories.AnyAsync(x => x.Id == categoryId);
+        public async Task<bool> ExistsByNameAsync(string name) => await context.Categories.AnyAsync(c => c.Name == name);
         public async Task SaveChangesAsync() => await context.SaveChangesAsync();
     }
 }

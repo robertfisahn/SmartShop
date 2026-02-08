@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-using SmartShopAPI.Models;
-using SmartShopAPI.Models.Dtos.Category;
+﻿using SmartShopAPI.Models.Dtos.Category;
 
 namespace SmartShopAPI.Interfaces.Services.Core
 {
