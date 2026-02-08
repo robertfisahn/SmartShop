@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public decimal TotalPrice { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public required string City { get; set; }
         public required string Street { get; set; }

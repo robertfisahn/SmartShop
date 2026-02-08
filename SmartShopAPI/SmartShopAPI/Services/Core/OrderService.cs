@@ -15,7 +15,7 @@ using SmartShopAPI.Models.Events;
 namespace SmartShopAPI.Services.Core
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper, ICartService cartService,
-        IProductService productService, IAccountService accountService, IOrderItemRepository orderItemRepository,
+        IProductService productService, IUserService userService, IOrderItemRepository orderItemRepository,
         IUnitOfWork unitOfWork, IPublishEndpoint publishEndpoint, IPaymentService paymentService) : IOrderService
     {
         public async Task<OrderDto> GetById(int orderId, int userId)
@@ -43,7 +43,7 @@ namespace SmartShopAPI.Services.Core
                 var orderEvent = new OrderPlacedEvent
                 {
                     OrderId = order.Id,
-                    Email = await accountService.GetEmailByIdAsync(userId),
+                    Email = await userService.GetEmailByIdAsync(userId),
                     TotalPrice = order.TotalPrice,
                     ProductNames = cartItems.Select(x => x.ProductName).ToList()
                 };
@@ -69,12 +69,15 @@ namespace SmartShopAPI.Services.Core
 
         private async Task<Order> CreateOrder(IEnumerable<CartItemDto> cartItems, int userId)
         {
-            var addressId = await accountService.GetAddressId(userId);
+            var shippingAddress = await userService.GetShippingAddressAsync(userId)
+                ?? throw new NotFoundException("User has no shipping address");
             Order order = new()
             {
                 TotalPrice = cartItems.Sum(x => x.Quantity * x.ProductPrice),
                 UserId = userId,
-                AddressId = addressId
+                ShippingStreet = shippingAddress.Street,
+                ShippingCity = shippingAddress.City,
+                ShippingPostalCode = shippingAddress.PostalCode,
             };
             await orderRepository.AddAsync(order);
             return order;
@@ -100,7 +103,7 @@ namespace SmartShopAPI.Services.Core
         public async Task<CheckoutDataDto> GetCheckoutData(int userId)
         {
             var cartItems = await cartService.GetCart(userId);
-            var address = await accountService.GetShippingAddress(userId);
+            var address = await userService.GetShippingAddressAsync(userId);
             var providers = paymentService.GetAvailableProviders();
 
             return new CheckoutDataDto
