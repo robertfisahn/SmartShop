@@ -1,5 +1,4 @@
-﻿using SmartShopAPI.Models;
-using SmartShopAPI.Models.Dtos.Category;
+﻿using SmartShopAPI.Entities;
 
 namespace SmartShopAPI.Interfaces.Repositories
 {
@@ -10,6 +9,7 @@ namespace SmartShopAPI.Interfaces.Repositories
         Task AddAsync(Category category);
         void Delete(Category category);
         Task<bool> ExistsAsync(int categoryId);
+        Task<bool> ExistsByNameAsync(string name);
         Task SaveChangesAsync();
     }
 }

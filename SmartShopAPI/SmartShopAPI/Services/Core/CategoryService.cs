@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 
-using Microsoft.EntityFrameworkCore;
-
+using SmartShopAPI.Entities;
 using SmartShopAPI.Exceptions;
 using SmartShopAPI.Interfaces.Repositories;
 using SmartShopAPI.Interfaces.Services.Core;
-using SmartShopAPI.Models;
 using SmartShopAPI.Models.Dtos.Category;
 
 namespace SmartShopAPI.Services.Core
