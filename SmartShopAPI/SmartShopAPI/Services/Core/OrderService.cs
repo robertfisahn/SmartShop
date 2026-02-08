@@ -10,6 +10,7 @@ using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Models.Dtos.CartItem;
 using SmartShopAPI.Models.Dtos.Order;
 using SmartShopAPI.Models.Dtos.Payment;
+using SmartShopAPI.Models.Enums;
 using SmartShopAPI.Models.Events;
 
 namespace SmartShopAPI.Services.Core
@@ -114,5 +115,20 @@ namespace SmartShopAPI.Services.Core
             };
         }
 
+        public async Task UpdatePaymentStatus(int orderId, string paymentReference, PaymentStatus status)
+        {
+            var order = await orderRepository.GetByIdAsync(orderId) ?? throw new NotFoundException("Order not found");
+            order.PaymentReference = paymentReference;
+            order.PaymentStatus = status;
+
+            await orderRepository.UpdateAsync(order);
+        }
+
+        public async Task UpdatePaymentStatusByReference(string paymentReference, PaymentStatus status)
+        {
+            var order = await orderRepository.GetByPaymentReferenceAsync(paymentReference) ?? throw new NotFoundException("Order not found");
+            order.PaymentStatus = status;
+            await orderRepository.UpdateAsync(order);
+        }
     }
 }

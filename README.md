@@ -1,174 +1,160 @@
-# ASP.NET Core + Angular
+# 🛒 SmartShop - Full-Stack E-commerce Platform
 
-## Project Overview
+[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/download)
+[![Angular 18](https://img.shields.io/badge/Angular-18-DD0031?logo=angular)](https://angular.io/)
+[![Docker](https://img.shields.io/badge/Docker-enabled-2496ED?logo=docker)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project consists of two applications:
-1. **ASP.NET Core (REST API)** – SmartShopAPI
-2. **Angular** – SmartShopUI
+## 🚀 Project Overview
 
-Both applications can be run in two ways:
-- **Using Docker**
-- **Manually (locally) via the console** – requires the appropriate tools and dependencies installed.
+SmartShop is a high-performance, modern e-commerce platform built with a focus on scalable architecture and seamless user experience. It features a complete shopping flow from product discovery to secure automated payments.
+
+### Key Features:
+- **Comprehensive Product Catalog**: Advanced filtering, search, and category management.
+- **Dynamic Shopping Cart**: Real-time updates and stock synchronization.
+- **Secure Authentication**: JWT-based identity management with role-based access control.
+- **Automated Payments**: Full PayPal integration with secure transaction verification.
+- **Event-Driven Messaging**: Asynchronous communication via **RabbitMQ** for order processing and email notifications.
+- **Robust Infrastructure**: Containerized with Docker for consistent development and production environments.
 
 ---
 
-## System Requirements
+## 🛠️ Tech Stack
+
+| Component      | Technologies & Tools |
+|----------------|----------------------|
+| **Backend**    | ASP.NET Core 8, EF Core, Primary Constructors, LINQ |
+| **Messaging**  | RabbitMQ, MassTransit (Event Bus) |
+| **Authentication** | JWT, Microsoft Identity, PasswordHasher |
+| **Service Layer** | Vertical Slice Architecture (planned), Repository Pattern, UoW |
+| **Frontend**   | Angular 18, RxJS, SCSS, Responsive Design |
+| **Database**   | SQL Server Express, Migrations |
+| **DevOps**     | Docker, Docker Compose, .env Configuration |
+| **Quality**    | AutoMapper, FluentValidation, XUnit, Integration Tests |
+
+---
+
+## 💳 Business Logic & Payment Flow
+
+The application implements a robust order processing system with dedicated payment provider support.
+
+### Payment Sequence:
+1. **Order Creation**: Stock is reserved and cart cleared within a DB transaction.
+2. **Init**: Backend creates a PayPal order and returns a secure Approval URL.
+3. **Approval**: User is redirected to PayPal's secure authorization site.
+4. **Finalization**: PayPal redirect triggers verification and order status update.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App as SmartShop UI
+    participant API as SmartShop API
+    participant PP as PayPal API
+
+    User->>App: Place Order
+    App->>API: Init Process
+    rect rgb(245, 245, 245)
+        Note over API: Transaction: Create Order, Update Stock, Publish Event
+    end
+    API->>PP: Create PayPal Order
+    PP-->>API: Return Approval URL
+    API-->>App: Approval URL
+    App-->>User: Redirect to PayPal
+    User->>PP: Authorize Payment
+    PP-->>App: Redirect back to return_url
+    App->>API: Verify Transaction
+    API->>PP: Get Order Status
+    API->>API: Set Order Status: Paid
+    API-->>App: Show Success
+```
+
+---
+
+## ⚙️ Setup & Configuration
 
 <details>
-<summary><strong>📋 View Requirements</strong></summary>
+<summary><strong>📋 1. System Requirements</strong></summary>
 
-### Docker:
-- Docker installed on your machine
-
-### Manual Setup:
-- .NET SDK (version 8.0) – download from [here](https://dotnet.microsoft.com/download)
-- Node.js (version 20.17.0) – download from [here](https://nodejs.org/)
-- Angular CLI (version 18.2.5) – install it globally:
-    ```bash
-    npm install -g @angular/cli@18.2.5
-    ```
-- **SQL Server Express** – download and install from [here](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (choose the Express version)
-
-> ⚠️ **IMPORTANT:**  
-> By default, the application is configured to use SQL Server Express. If you are using a different version of SQL Server or a custom setup, you will need to update the connection string in the `.env` file.
-
-- **RabbitMQ** – download and install from [here](https://www.rabbitmq.com/download.html).  
-  Make sure it is running locally at `localhost:5672` with the default credentials: `guest / guest`.  
-  The management UI is available at [http://localhost:15672](http://localhost:15672).
-
-
-- **SendGrid** – [Create a free SendGrid account](https://sendgrid.com/) and generate an API key.
+- **.NET SDK 8.0**
+- **Node.js 20.17+** & **Angular CLI 18.2.5**
+- **SQL Server Express**
+- **RabbitMQ** (running locally at `localhost:5672`)
+- **Docker Desktop** (optional, recommended for production-like testing)
+- **SendGrid API Key** (for email notifications)
 
 </details>
 
----
-
-## ⚠️ Environment Configuration (`.env` file) ⚠️
-
 <details>
-<summary><strong>⚙️ Environment Setup</strong></summary>
+<summary><strong>🔑 2. Environment Setup (.env)</strong></summary>
 
-To run the project properly – whether **locally** or using **Docker** – you need to create a `.env` file in the **root** directory of the repository (`SmartShop/`).
-
-This file contains environment-specific configuration such as database connection strings, JWT secrets, SMTP keys, and RabbitMQ settings.  
-Both the **ASP.NET Core API** and **Docker containers** rely on values from this file.
-
-> ⚠️ **Note:**  
-> The `.env` file is intentionally excluded from version control (`.gitignore`).  
-> You must **create it manually** before running the project.
-
-### Example `.env` file (template):
+Create a `.env` file in the root directory (`SmartShop/`). Use the following template:
 
 ```env
-# Database connection string
+# Database
 ConnectionStrings__SmartShopDbConnection=Server=localhost\SQLEXPRESS;Database=SmartShopDb;Trusted_Connection=True;TrustServerCertificate=True;
 
-# JWT authentication
-Authentication__JwtKey=your_secret_jwt_key_here
+# JWT
+Authentication__JwtKey=your_very_secret_key_minimum_32_chars
 Authentication__JwtIssuer=http://localhost:5000
 Authentication__JwtExpireDays=2
 
-# SendGrid email configuration
-SendGrid__ApiKey=your_sendgrid_api_key
-SendGrid__FromEmail=your_email@example.com
-SendGrid__FromName=SmartShopAPI
+# Integration Keys
+SendGrid__ApiKey=your_sendgrid_key
+PayPal__ClientId=your_paypal_client_id
+PayPal__Secret=your_paypal_secret
 
-# RabbitMQ configuration
+# Infrastructure
 RabbitMQ__UserName=guest
 RabbitMQ__Password=guest
 RabbitMQ__Host=localhost
-RabbitMQ__Port=5672
-
-# Docker compatibility aliases (used by docker-compose)
-RABBITMQ_DEFAULT_USER=guest
-RABBITMQ_DEFAULT_PASS=guest
 ```
 
 </details>
 
----
-
-## Running the Application
 <details>
-<summary><strong>🐳 1. Using Docker (Prebuilt Images)</strong></summary>
+<summary><strong>🚀 3. How to Run</strong></summary>
 
-Uses latest prebuilt images from Docker Hub via continuous delivery. **Fastest option!**
+### Option A: Docker (Easiest)
+```bash
+docker-compose up --build
+```
+Access UI at: `http://localhost:4288`
 
-1. Clone the repository:
-    ```bash
-   git clone https://github.com/robertfisahn/SmartShop
-   cd SmartShop
-    
-2. Run with prebuilt images:
-    ```bash
-   docker-compose -f docker-compose.deploy.yml up
-    
-3. The application should be accessible at:
-   `http://localhost:4288`
+### Option B: Local Development
+**Backend:**
+```bash
+cd SmartShopAPI/SmartShopAPI
+dotnet run
+```
+Access Swagger at: `http://localhost:5108/swagger`
 
-</details>
-<details>
-<summary><strong>🐳 2. Using Docker (Build from Source)</strong></summary>
-
-1. Clone the repository:
-    ```bash
-   git clone https://github.com/robertfisahn/SmartShop
-   cd SmartShop
-    
-2. Run the application using Docker Compose:
-    ```bash
-   docker-compose up --build
-    
-3. The application should be accessible at:
-   `http://localhost:4288`
-
-</details>
-
-<details>
-<summary><strong>🔧 3. Running Manually (Development Mode)</strong></summary>
-
-#### Backend (ASP.NET Core)
-
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/robertfisahn/SmartShop
-    cd SmartShop/SmartShopAPI/SmartShopAPI
-
-2. Install dependencies and run the application:
-    ```bash
-   dotnet restore
-   dotnet run
-
-3. The backend should be accessible at: `http://localhost:5108/swagger`
-
-#### Frontend (Angular)
-
-1. Navigate to the Angular folder:  
-    ```bash
-   cd SmartShop/SmartShopUI/SmartShopUI
-
-2. Install dependencies:
-    ```bash
-   npm install
-    
-3. Run the Angular application:
-    ```bash
-   ng serve
-    
-4. The frontend will be accessible at: `http://localhost:4200`
+**Frontend:**
+```bash
+cd SmartShopUI/SmartShopUI
+npm install
+ng serve
+```
+Access UI at: `http://localhost:4200`
 
 </details>
 
 ---
 
-## User Authentication
+## 👨‍💻 Demo Accounts
 
-You can log into the application using the following demo accounts:
+Explore the system with pre-configured roles:
 
-- **Admin Account**:
-   - Email: `admin@admin.com`
-   - Password: `admin123`
-   
-- **User Account**:
-   - Email: `user@user.com`
-   - Password: `user1234`
+| Role  | Email | Password |
+|-------|-------|----------|
+| **Administrator** | `admin@admin.com` | `admin123` |
+| **Standard User** | `user@user.com` | `user1234` |
+
+---
+
+## 📂 Project Documentation
+
+Deep dive into our architectural decisions and refactoring progress:
+- [Entity Modeling Standards](file:///C:/Users/rober/.gemini/antigravity/brain/a1693671-7c11-477c-aa27-ab92273ca725/entity_modeling_guide.md)
+- [Database Schema (ERD)](file:///C:/Users/rober/.gemini/antigravity/brain/a1693671-7c11-477c-aa27-ab92273ca725/database_erd.md)
+- [Detailed Payment Flow](file:///C:/Users/rober/.gemini/antigravity/brain/a1693671-7c11-477c-aa27-ab92273ca725/payment_flow_docs.md)
+- [Current Task Tracker](file:///C:/Users/rober/.gemini/antigravity/brain/a1693671-7c11-477c-aa27-ab92273ca725/task.md)

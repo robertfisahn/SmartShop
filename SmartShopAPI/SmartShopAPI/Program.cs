@@ -8,7 +8,6 @@ using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -22,9 +21,6 @@ using SmartShopAPI.Interfaces.Services.Core;
 using SmartShopAPI.Interfaces.Services.Infrastructure;
 using SmartShopAPI.Interfaces.Services.Integrations;
 using SmartShopAPI.Middleware;
-using SmartShopAPI.Models.Dtos;
-using SmartShopAPI.Models.Dtos.Product;
-using SmartShopAPI.Models.Dtos.User;
 using SmartShopAPI.Models.Settings;
 using SmartShopAPI.Models.Validators;
 using SmartShopAPI.Repositories;
@@ -38,19 +34,19 @@ builder.Configuration.AddEnvironmentVariables();
 var allowedUi = builder.Configuration["AllowedUi"]
                 ?? "http://localhost:4200";
 builder.Services.AddHealthChecks();
-
+//AUTHENTICATION
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 builder.Services.AddSingleton(authenticationSettings);
-
+//PAYPAL
 builder.Services.Configure<PayPalSettings>(
     builder.Configuration.GetSection("PayPal")
 );
-
+//PAYMENT
 var paymentSettings = new PaymentsSettings();
 builder.Configuration.GetSection("Payments").Bind(paymentSettings);
 builder.Services.AddSingleton(paymentSettings);
-
+//RABBITMQ
 var rabbitSettings = new RabbitMqSettings();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitSettings);
 builder.Services.AddSingleton(rabbitSettings);
@@ -128,6 +124,8 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IFileService, FileService>();
+
+//repo
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
@@ -135,15 +133,17 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
-builder.Services.AddScoped<IValidator<UpsertProductDto>, CreateProductDtoValidator>();
-builder.Services.AddScoped<IValidator<QueryParams>, QueryParamsValidator>();
+//validators
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDtoValidator>();
+
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+
+//payment
 builder.Services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-
 builder.Services.AddScoped<IPaymentProvider, PayPalProvider>();
+
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

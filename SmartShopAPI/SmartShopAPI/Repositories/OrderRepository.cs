@@ -25,9 +25,9 @@ namespace SmartShopAPI.Repositories
             .Where(o => o.Id == orderId)
             .FirstOrDefaultAsync();
 
-        public Task<Order?> GetByProviderOrderIdAsync(string providerOrderId) =>
+        public Task<Order?> GetByPaymentReferenceAsync(string paymentReference) =>
             context.Orders
-            .Where(o => o.PaymentReference == providerOrderId)
+            .Where(o => o.PaymentReference == paymentReference)
             .FirstOrDefaultAsync();
         public async Task AddAsync(Order order) => await context.Orders.AddAsync(order);
 

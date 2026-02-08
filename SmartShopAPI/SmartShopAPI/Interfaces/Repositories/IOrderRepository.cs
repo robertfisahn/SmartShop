@@ -8,7 +8,7 @@ namespace SmartShopAPI.Interfaces.Repositories
         Task<Order?> GetAsync(int orderId, int userId);
         Task AddAsync(Order order);
         Task<Order?> GetByIdAsync(int orderId);
-        Task<Order?> GetByProviderOrderIdAsync(string providerOrderId);
+        Task<Order?> GetByPaymentReferenceAsync(string paymentReference);
         Task UpdateAsync(Order order);
     }
 }
