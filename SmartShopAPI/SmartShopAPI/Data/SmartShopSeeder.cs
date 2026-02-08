@@ -181,15 +181,16 @@ namespace SmartShopAPI.Data
                     FirstName = "Admin",
                     LastName = "Admin",
                     DateOfBirth = new DateTime(1980, 1, 1),
-                    RoleId = 1,
-                    Address = new Address
-                    {
-                        City = "Warsaw",
-                        Street = "Admin St",
-                        PostalCode = "00-111"
-                    }
+                    RoleId = 1
                 };
                 admin.PasswordHash = _passwordHasher.HashPassword(admin, "admin123");
+                admin.Addresses.Add(new Address
+                {
+                    City = "Warsaw",
+                    Street = "Admin St",
+                    PostalCode = "00-111",
+                    IsDefault = true
+                });
 
                 var user = new User
                 {
@@ -197,15 +198,17 @@ namespace SmartShopAPI.Data
                     FirstName = "User",
                     LastName = "User",
                     DateOfBirth = new DateTime(1990, 5, 15),
-                    RoleId = 2,
-                    Address = new Address
-                    {
-                        City = "Krakow",
-                        Street = "User St",
-                        PostalCode = "30-222"
-                    }
+                    RoleId = 2
                 };
                 user.PasswordHash = _passwordHasher.HashPassword(user, "user1234");
+                user.Addresses.Add(new Address
+                {
+                    City = "Krakow",
+                    Street = "User St",
+                    PostalCode = "30-222",
+                    IsDefault = true
+                });
+
                 _context.Users.AddRange(admin, user);
                 _context.SaveChanges();
             }
