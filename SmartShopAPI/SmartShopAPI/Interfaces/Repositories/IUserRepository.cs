@@ -1,5 +1,5 @@
 ﻿using SmartShopAPI.Entities;
-
+using SmartShopAPI.Models.Dtos.User;
 namespace SmartShopAPI.Interfaces.Repositories
 {
     public interface IUserRepository
@@ -10,6 +10,7 @@ namespace SmartShopAPI.Interfaces.Repositories
         Task AddAsync(User user);
         Task<bool> EmailExistsAsync(string email);
         Task SaveChangesAsync();
-        Task<User?> GetShippingAddress(int userId);
+        Task<ShippingAddressDto?> GetShippingAddressAsync(int userId);
+        Task<User?> GetByRefreshTokenAsync(string refreshToken);
     }
 }

@@ -12,24 +12,27 @@ import { jwtDecode } from 'jwt-decode';
 })
 
 export class AccountService {
-  private apiUrl = `${environment.apiUrl}/api/account`;
+  private apiUrl = `${environment.apiUrl}/api/auth`;
 
   constructor(private http: HttpClient, private cartService: CartService) { }
 
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
       tap(response => {
-        if (response && response.token) {
-          sessionStorage.setItem('token', response.token);
-
-          this.cartService.updateCartCount(); 
+        if (response && response.accessToken) {
+          sessionStorage.setItem('token', response.accessToken);
+          // Opcjonalnie: przechowaj refreshToken
+          if (response.refreshToken) {
+            sessionStorage.setItem('refreshToken', response.refreshToken);
+          }
+          this.cartService.updateCartCount();
         }
       })
     );
   }
 
   register(user: RegisterUserDto): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/registration`, user );
+    return this.http.post<any>(`${this.apiUrl}/register`, user);
   }
 
   logout(): void {

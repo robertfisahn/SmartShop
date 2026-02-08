@@ -48,6 +48,36 @@
     </div>
 
     <div class="form-group">
+      <label for="firstName">First Name</label>
+      <input type="text"
+             id="firstName"
+             name="firstName"
+             ngModel
+             required
+             #firstName="ngModel"
+             [ngClass]="{ 'is-invalid': firstName.invalid && firstName.touched }"
+             placeholder="Enter your first name" />
+      <div *ngIf="firstName.invalid && firstName.touched" class="invalid-feedback">
+        First name is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">Last Name</label>
+      <input type="text"
+             id="lastName"
+             name="lastName"
+             ngModel
+             required
+             #lastName="ngModel"
+             [ngClass]="{ 'is-invalid': lastName.invalid && lastName.touched }"
+             placeholder="Enter your last name" />
+      <div *ngIf="lastName.invalid && lastName.touched" class="invalid-feedback">
+        Last name is required.
+      </div>
+    </div>
+
+    <div class="form-group">
       <label for="city">City</label>
       <input type="text"
              id="city"
