@@ -5,7 +5,8 @@ namespace SmartShopAPI.Interfaces.Services.Core
     public interface IPaymentService
     {
         Task<PaymentInitResult> StartPaymentAsync(int orderId, decimal amount, string providerName);
-        Task HandleWebhookAsync(string providerName, string paymentReference);
+        Task<PaymentStatusResult> VerifyPaymentAsync(string providerName, string paymentReference);
         List<PaymentProviderDto> GetAvailableProviders();
     }
 }
+

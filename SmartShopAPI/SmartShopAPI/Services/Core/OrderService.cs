@@ -60,6 +60,9 @@ namespace SmartShopAPI.Services.Core
             }
 
             var payment = await paymentService.StartPaymentAsync(order.Id, order.TotalPrice, provider);
+            order.PaymentReference = payment.ProviderOrderId;
+            order.PaymentStatus = PaymentStatus.Pending;
+            await orderRepository.UpdateAsync(order);
 
             return new PlaceOrderResponse
             {
