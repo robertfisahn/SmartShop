@@ -13,7 +13,8 @@ namespace SmartShopAPI.Repositories
         public async Task AddAsync(Category category) => await context.Categories.AddAsync(category);
         public void Delete(Category category) => context.Categories.Remove(category);
         public async Task<bool> ExistsAsync(int categoryId) => await context.Categories.AnyAsync(x => x.Id == categoryId);
-        public async Task<bool> ExistsByNameAsync(string name) => await context.Categories.AnyAsync(c => c.Name == name);
+        public async Task<bool> ExistsByNameAsync(string name, int? categoryId = null) => 
+            await context.Categories.AnyAsync(c => c.Name == name && (!categoryId.HasValue || c.Id != categoryId.Value));
         public async Task SaveChangesAsync() => await context.SaveChangesAsync();
     }
 }

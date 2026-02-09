@@ -9,7 +9,7 @@ namespace SmartShopAPI.Interfaces.Repositories
         Task AddAsync(Category category);
         void Delete(Category category);
         Task<bool> ExistsAsync(int categoryId);
-        Task<bool> ExistsByNameAsync(string name);
+        Task<bool> ExistsByNameAsync(string name, int? categoryId = null);
         Task SaveChangesAsync();
     }
 }
