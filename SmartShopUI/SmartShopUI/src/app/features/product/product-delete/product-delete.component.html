@@ -1,0 +1,24 @@
+<div class="delete-confirm-container">
+    <h2>Are you sure you want to delete this product?</h2>
+    <form *ngIf="product">
+        <label for="name">Name:</label>
+        <input type="text" id="name" [value]="product.name" disabled>
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" [value]="product.description" disabled>
+
+        <label for="price">Price:</label>
+        <input type="text" id="price" [value]="product.price" disabled>
+
+        <label for="stockQuantity">Stock Quantity:</label>
+        <input type="text" id="stockQuantity" [value]="product.stockQuantity" disabled>
+
+        <label for="category">Category ID:</label>
+        <input type="text" id="category" [value]="product.categoryId" disabled>
+
+        <div class="buttons">
+            <button (click)="onDeleteConfirm()" class="confirm-btn">Delete</button>
+            <button (click)="onCancel()" class="cancel-btn">Cancel</button>
+        </div>
+    </form>
+</div>

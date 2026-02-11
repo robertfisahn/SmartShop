@@ -5,7 +5,7 @@
       <a class="nav-link" routerLink="/product/all">All Products</a>
     </div>
     <div class="navbar-right">
-      <ng-container *ngIf="accountService.isLoggedIn(); else loginLink">
+      <ng-container *ngIf="authService.isLoggedIn(); else loginLink">
         <button class="cart-btn" routerLink="/cart">
           <i class="fas fa-shopping-cart"></i>
           <span *ngIf="cartItemCount > 0">
@@ -13,7 +13,7 @@
           </span>
         </button>
         <div class="dropdown" (click)="toggleDropdown()">
-          <span class="user-info">{{ accountService.getUserEmail() }}</span>
+          <span class="user-info">{{ authService.getUserEmail() }}</span>
           <div class="dropdown-menu" [class.show]="dropdownOpen">
             <a class="dropdown-item" (click)="logout()">Logout</a>
             <a class="dropdown-item" routerLink="/settings">Settings</a>
@@ -27,7 +27,7 @@
     </div>
   </nav>
 </header>
-<aside *ngIf="accountService.isAdmin()" class="admin-sidebar">
+<aside *ngIf="authService.isAdmin()" class="admin-sidebar">
   <ul>
     <li>
       <a (click)="toggleProductMenu()">Product</a>
@@ -60,7 +60,7 @@
 
 <footer class="footer">
   <p>2024 powered by #1337</p>
-  <img src="./assets/visa.png" alt="desc" class="header-gif" />
-  <img src="./assets/mastercard.png" alt="desc" class="header-gif" />
-  <img src="./assets/paypal.png" alt="desc" class="header-gif" />
+  <img src="/assets/visa.png" alt="desc" class="header-gif" />
+  <img src="/assets/mastercard.png" alt="desc" class="header-gif" />
+  <img src="/assets/paypal.png" alt="desc" class="header-gif" />
 </footer>

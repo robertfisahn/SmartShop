@@ -1,0 +1,58 @@
+<div class="order-confirmation">
+
+    <div *ngIf="cartItems.length > 0; else emptyState">
+
+        <div class="row">
+            <div class="card half">
+                <h2>Order Items</h2>
+
+                <div class="items-container">
+                    <div class="item-row" *ngFor="let item of cartItems">
+                        <img [src]="getProductImageUrl(item.productImagePath)" class="item-image"
+                            alt="{{ item.productName }}" />
+
+                        <div class="item-info">
+                            <h3>{{ item.productName }}</h3>
+                            <div class="quantity-info">Quantity: {{ item.quantity }}</div>
+                            <p class="price">{{ item.productPrice * item.quantity | currency }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h3 class="total-heading">
+                        Total: <span class="total">{{ totalAmount | currency }}</span>
+                    </h3>
+                </div>
+            </div>
+
+            <div class="card half">
+                <h2>Shipping Address</h2>
+
+                <div *ngIf="userAddress">
+                    <p>{{ userAddress.firstName }} {{ userAddress.lastName }}</p>
+                    <p>{{ userAddress.street }}, {{ userAddress.city }}</p>
+                    <p>{{ userAddress.postalCode }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full">
+            <h2>Payment Method</h2>
+
+            <select [(ngModel)]="selectedProvider" class="payment-select">
+                <option value="PayPal">PayPal</option>
+            </select>
+
+            <button class="btn-submit" (click)="placeOrder()">
+                Place Order & Pay
+            </button>
+        </div>
+    </div>
+
+    <ng-template #emptyState>
+        <div class="empty-state-message">
+            <p>Your cart is empty</p>
+        </div>
+    </ng-template>
+</div>

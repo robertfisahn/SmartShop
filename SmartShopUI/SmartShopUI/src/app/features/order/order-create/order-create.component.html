@@ -1,0 +1,28 @@
+<div *ngIf="order" class="order-create">
+    <h2>Thank You for Your Order!</h2>
+    <p>Your order has been successfully placed.</p>
+    <p>We will send you an email confirmation shortly.</p>
+    <a routerLink="/cart">Return to Cart</a>
+
+    <div class="order-summary">
+        <h3>Order Summary</h3>
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Total Price:</strong> {{ order.totalPrice | currency }}</p>
+        <p><strong>Created Date:</strong> {{ order.createdAt | date }}</p>
+
+        <h4>Delivery Address</h4>
+        <p><strong>City:</strong> {{ order.city }}</p>
+        <p><strong>Street:</strong> {{ order.street }}</p>
+        <p><strong>Postal Code:</strong> {{ order.postalCode }}</p>
+
+        <h4>Order Items</h4>
+        <ul>
+            <li *ngFor="let item of order.orderItems">
+                <p><strong>Product ID:</strong> {{ item.productId }}</p>
+                <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                <p><strong>Product Name:</strong> {{ item.product.name }}</p>
+                <p><strong>Price:</strong> {{ item.product.price | currency }}</p>
+            </li>
+        </ul>
+    </div>
+</div>
