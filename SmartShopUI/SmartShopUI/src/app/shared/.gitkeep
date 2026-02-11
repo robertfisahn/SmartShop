@@ -1,0 +1,2 @@
+# Ten plik pozwala Gitowi śledzić ten folder, nawet jeśli jest pusty.
+# Wkrótce trafią tu wspólne komponenty UI (np. Header, Footer).

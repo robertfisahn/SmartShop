@@ -1,15 +1,15 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountService } from './services/account/account.service';
-import { CartService } from './services/cart/cart.service';
+import { AuthService } from './features/auth/auth.service';
+import { CartService } from './features/cart/cart.service';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'SmartShopUI';
   searchQuery: string = '';
   dropdownOpen = false;
@@ -17,18 +17,18 @@ export class AppComponent {
   productMenuOpen = false;
   isLoggedIn = false;
   isAdminRole = false;
-  productId: number | null = null;           
-  showModal: boolean = false;   
+  productId: number | null = null;
+  showModal: boolean = false;
   operation: 'update' | 'delete' = 'update';
 
-  constructor(private router: Router, public accountService: AccountService, private cartService: CartService) { }
+  constructor(private router: Router, public authService: AuthService, private cartService: CartService) { }
 
   ngOnInit(): void {
     this.cartService.getCartItemCount().subscribe(count => {
       this.cartItemCount = count;
     });
-    this.isLoggedIn = this.accountService.isLoggedIn();
-    this.isAdminRole = this.accountService.isAdmin();
+    this.isLoggedIn = this.authService.isLoggedIn();
+    this.isAdminRole = this.authService.isAdmin();
   }
 
   onSearch(): void {
@@ -38,7 +38,7 @@ export class AppComponent {
   }
 
   logout(): void {
-    this.accountService.logout();
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 
@@ -79,4 +79,3 @@ export class AppComponent {
   }
 
 }
-

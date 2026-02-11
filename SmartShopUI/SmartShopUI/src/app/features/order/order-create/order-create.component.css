@@ -1,0 +1,9 @@
+.order-create {
+    padding-top: 120px;
+    color: white;
+    font-size: 40px;
+}
+
+.order-create a {
+    text-decoration: none;
+}

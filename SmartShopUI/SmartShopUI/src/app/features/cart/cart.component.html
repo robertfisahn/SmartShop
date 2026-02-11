@@ -1,0 +1,40 @@
+<div class="cart">
+    <div *ngIf="cartItems.length > 0; else emptyCart">
+        <h2>Your Cart</h2>
+        <div class="cart-items">
+            <div class="cart-item" *ngFor="let item of cartItems">
+                <img [src]="getProductImageUrl(item.productImagePath)" class="product-image">
+
+                <div class="item-details">
+                    <h3>{{ item.productName }}</h3>
+                    <div class="quantity-container">
+                        <label for="quantity-{{ item.id }}">Quantity:</label>
+                        <input id="quantity-{{ item.id }}" type="number" [(ngModel)]="item.quantity"
+                            (change)="updateItem(item.id, item.quantity)" min="1" step="1" pattern="\d*" min="1"
+                            [attr.max]="item.productStockQuantity" required>
+                        <span class="quantity-info">
+                            (Max: {{ item.productStockQuantity }})
+                        </span>
+                    </div>
+                    <p class="price">{{ item.productPrice * item.quantity | currency }}</p>
+                </div>
+                <button class="remove-button" (click)="removeItem(item.id)">Remove</button>
+            </div>
+            <div class="cart-summary">
+                <h3 class="total-heading">
+                    Total: <span class="total">{{ totalAmount | currency }}</span>
+                </h3>
+                <button (click)="clearCart()" class="btn-clear">Clear Cart</button>
+            </div>
+            <button class="btn-order" (click)="navigateToOrderConfirmation()">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+    <ng-template #emptyCart>
+        <div class="empty-cart-message">
+            <h3>Your cart is currently empty</h3>
+            <p>Add some products to your cart to place an order.</p>
+        </div>
+    </ng-template>
+</div>

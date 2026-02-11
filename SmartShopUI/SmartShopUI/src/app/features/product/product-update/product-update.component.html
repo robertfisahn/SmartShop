@@ -1,0 +1,40 @@
+<form (ngSubmit)="onSubmit()" #productForm="ngForm" class="form-container">
+    <div>
+        <label for="name">Product Name</label>
+        <input type="text" id="name" name="name" [(ngModel)]="product.name" required>
+    </div>
+
+    <div>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" [(ngModel)]="product.description" required></textarea>
+    </div>
+
+    <div>
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" [(ngModel)]="product.price" required>
+    </div>
+
+    <div>
+        <label for="stockQuantity">Stock Quantity</label>
+        <input type="number" id="stockQuantity" name="stockQuantity" [(ngModel)]="product.stockQuantity" required>
+    </div>
+
+    <div>
+        <label for="category">Category</label>
+        <select id="category" name="categoryId" [(ngModel)]="product.categoryId" required>
+            <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="image">Image</label>
+        <input type="file" id="image" (change)="onFileSelected($event)">
+        <div *ngIf="product.imagePath">
+            <p>Current image:</p>
+            <img [src]="getImageUrl(product.imagePath)" alt="{{ product.name }}"
+                style="max-width: 200px; max-height: 150px;">
+        </div>
+    </div>
+
+    <button type="submit" [disabled]="!productForm.form.valid">Update Product</button>
+</form>

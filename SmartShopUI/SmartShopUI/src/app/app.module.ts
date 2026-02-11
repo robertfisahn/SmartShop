@@ -4,47 +4,48 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
-import { AccountService } from './services/account/account.service';
+import { AuthService } from './features/auth/auth.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { AuthInterceptor } from './core/auth.interceptor';
 
 import { AppComponent } from './app.component';
-import { ProductListComponent } from './components/product/product-list/product-list.component';
-import { HomeComponent } from './home/home.component';
-import { ProductDetailsComponent } from './components/product/product-details/product-details.component';
-import { AccountRegisterComponent } from './components/account/account-register/account-register.component';
-import { AccountLoginComponent } from './components/account/account-login/account-login.component';
-import { AccountDetailsComponent } from './components/account/account-details/account-details.component';
-import { CartComponent } from './components/cart/cart.component';
-import { OrderCreateComponent } from './components/order/order-create/order-create.component';
-import { OrderConfirmationComponent } from './components/order/order-confirmation/order-confirmation.component';
-import { OrderDetailsComponent } from './components/order/order-details/order-details.component';
-import { ProductCreateComponent } from './components/product/product-create/product-create.component';
-import { ProductUpdateComponent } from './components/product/product-update/product-update.component';
-import { ProductDeleteComponent } from './components/product/product-delete/product-delete.component';
-import { OrderHistoryComponent } from './components/order/order-history/order-history.component';
+import { ProductListComponent } from './features/product/product-list/product-list.component';
+import { HomeComponent } from './features/home/home.component';
+import { ProductDetailsComponent } from './features/product/product-details/product-details.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { AccountDetailsComponent } from './features/auth/account-details/account-details.component';
+import { CartComponent } from './features/cart/cart.component';
+import { OrderCreateComponent } from './features/order/order-create/order-create.component';
+import { OrderConfirmationComponent } from './features/order/order-confirmation/order-confirmation.component';
+import { OrderDetailsComponent } from './features/order/order-details/order-details.component';
+import { ProductCreateComponent } from './features/product/product-create/product-create.component';
+import { ProductUpdateComponent } from './features/product/product-update/product-update.component';
+import { ProductDeleteComponent } from './features/product/product-delete/product-delete.component';
+import { OrderHistoryComponent } from './features/order/order-history/order-history.component';
 
-@NgModule({ declarations: [
-        AppComponent,
-        HomeComponent,
-        ProductListComponent,
-        ProductDetailsComponent,
-        AccountRegisterComponent,
-        AccountLoginComponent,
-        AccountDetailsComponent,
-        CartComponent,
-        OrderCreateComponent,
-        OrderConfirmationComponent,
-        OrderDetailsComponent,
-        OrderHistoryComponent,
-        ProductCreateComponent,
-        ProductUpdateComponent,
-        ProductDeleteComponent
-    ],
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    ProductListComponent,
+    ProductDetailsComponent,
+    RegisterComponent,
+    LoginComponent,
+    AccountDetailsComponent,
+    CartComponent,
+    OrderCreateComponent,
+    OrderConfirmationComponent,
+    OrderDetailsComponent,
+    OrderHistoryComponent,
+    ProductCreateComponent,
+    ProductUpdateComponent,
+    ProductDeleteComponent
+  ],
   bootstrap: [AppComponent],
   imports: [BrowserModule,
-        AppRoutingModule,
-        FormsModule,
+    AppRoutingModule,
+    FormsModule,
     ReactiveFormsModule],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },
@@ -53,5 +54,5 @@ import { OrderHistoryComponent } from './components/order/order-history/order-hi
   ]
 })
 export class AppModule {
-  constructor(public accountService: AccountService) { }
+  constructor(public authService: AuthService) { }
 }

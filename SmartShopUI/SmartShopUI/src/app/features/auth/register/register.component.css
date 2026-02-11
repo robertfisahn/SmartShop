@@ -1,0 +1,67 @@
+.background {
+    padding-bottom: 50px;
+}
+
+.main {
+    padding: 30px;
+    border-radius: 15px;
+    background-color: #121212;
+    color: white;
+    box-shadow: 0 4px 8px #0070d1;
+}
+
+.main p {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    width: 500px;
+    padding: 10px;
+    margin: 5px 0 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+input[type="email"].is-invalid,
+input[type="password"].is-invalid,
+input[type="text"].is-invalid {
+    border: 2px solid;
+    border-color: #e74c3c;
+}
+
+.invalid-feedback {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: -10px;
+}
+
+.btn-register {
+    width: 100%;
+    padding: 10px;
+    background-color: #004682;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+.btn-register:hover {
+    background-color: #0070d1;
+    box-shadow: 0 0 15px 1px rgba(0, 112, 209, 0.7);
+}

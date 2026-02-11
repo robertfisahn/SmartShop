@@ -1,0 +1,20 @@
+<div *ngIf="products.length > 0; else noProducts" class="product-container">
+    <div class="alert alert-success" *ngIf="showSuccessMessage">
+        Product added to cart successfully!
+    </div>
+    <div *ngFor="let product of products" class="product-card">
+        <a [routerLink]="['/product-details', product.id]" class="product-link">
+            <div class="product-image">
+                <img [src]="getImageUrl(product.imagePath)" [alt]="product.name" />
+            </div>
+            <h2 class="product-title">{{ product.name }}</h2>
+            <p class="product-price">{{ product.price | currency }}</p>
+            <p *ngIf="authService.isAdmin()" class="product-id">Product ID: {{ product.id }}</p>
+        </a>
+        <button class="add-to-cart-btn" (click)="addToCart(product.id)">Add to Cart</button>
+    </div>
+</div>
+
+<ng-template #noProducts>
+    <p>No products available.</p>
+</ng-template>
